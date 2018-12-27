@@ -1,2 +1,43 @@
 # duktape-webgl
-Duktape WebGL 2.0 bindings
+[WebGL](https://www.khronos.org/webgl/) 2.0 bindings for [Duktape embeddable Javascript engine](http://duktape.org)
+
+* duktape-webgl implements fairly many WebGL 1.0 and 2.0 methods and constants.
+  * \*_WEBGL constants and methods not available in core OpenGL are missing.
+  * duktape-webgl runs desktop [OpenGL Core Profile](https://www.khronos.org/opengl/) beneath, not [OpenGL ES](https://www.khronos.org/opengles/) to which WebGL is based.
+* If you're looking for [OpenGL 1.x](https://www.khronos.org/registry/OpenGL/specs/gl/glspec13.pdf) legacy bindings, check [duktape-opengl project](https://github.com/mrautio/duktape-opengl).
+
+## Setup
+* Include dukwebgl.h to your Duktape & OpenGL project.
+
+### C initialization example
+
+```
+// Applicable OpenGL header needs to be included before dukwebgl
+#include <GL/glcorearb.h>
+
+// Duktape needs to be included before dukwebgl
+#include "duktape.h"
+
+// DUKWEBGL_IMPLEMENTATION needs to be defined in *one* source file to create the implementation.
+#define DUKWEBGL_IMPLEMENTATION 
+#inlude "dukwebgl.h"
+
+...
+dukwebgl_bind(ctx);
+...
+```
+
+### JS initialization example
+```
+var gl = new WebGL2RenderingContext();
+// now you should be able to call WebGL methods as you wish
+```
+
+## Generating duktape-webgl header
+* As an end user, you should just download latest pre-generated header file. Generator is meant for development.
+* If you want to generate content then by all means. This is done using Docker:
+
+```
+docker build -t duktape-webgl-generator . && docker run -t --read-only duktape-webgl-generator > dukwebgl.h
+```
+

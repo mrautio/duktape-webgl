@@ -1,0 +1,20 @@
+{
+  "name": "duktape-webgl-generator",
+  "description": "Generate WebGL bindings for Duktape",
+  "version": "0.0.0",
+  "contributors": [
+    "Mika Rautio (https://github.com/mrautio)"
+  ],
+  "license": "Zlib",
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "webidl2": "^17.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node generator.js"
+  },
+  "repository": "git://github.com/mrautio/duktape-webgl",
+  "main": "generator.js",
+  "files": []
+}
