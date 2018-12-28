@@ -70,22 +70,29 @@ var glTypeDukTypeReturnFunctionMap = {
 };
 
 var customWebGlBindingImplementations = {
-	"getProgramParameter": {"argumentCount": 2},
-	"getProgramInfoLog": {"argumentCount": 1},
-	"shaderSource": {"argumentCount": 2},
-	"getShaderParameter": {"argumentCount": 2},
-	"getShaderInfoLog": {"argumentCount": 1},
-	"createBuffer": {"argumentCount": 0},
-	"createTexture": {"argumentCount": 0},
+	"getProgramParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
+	"getProgramInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
+	"shaderSource": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
+	"getShaderParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
+	"getShaderInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
+	"createBuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
+	"createTexture": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
 };
 
 var constantRegExp = new RegExp(/#\s*define\s+([\w\d_]+)\s+([\w\d-]+)/);
 var methodRegExp = new RegExp(/GLAPI\s+([\w\d_]+)\s+APIENTRY\s+([\w\d-]+)\s*\(\s*([\w\d\s_,*]+)\s*\)\s*;/);
 var argumentRegExp = new RegExp(/(const\s+)?([\w\d]+\s*\**)\s*([\w\d]+)/);
+var currentProcessedVersion = "GL_VERSION_0_0"; // undefined version
+var glVersionList = [currentProcessedVersion];
+
 glCHeader.split("\n").forEach(line => {
 	var match = constantRegExp.exec(line);
 	if (match) {
 		cConstants.push({"name":match[1], "value":match[2]});
+		if (match[1].startsWith("GL_VERSION_")) {
+			currentProcessedVersion = match[1];
+			glVersionList.push(currentProcessedVersion);
+		}
 	} else {
 		match = methodRegExp.exec(line);
 		if (match) {
@@ -111,7 +118,8 @@ glCHeader.split("\n").forEach(line => {
 
 				argumentList.push(arg);
 			});
-			cMethods.push(({"returnType": match[1], "name": match[2], "argumentList": argumentList}));
+
+			cMethods.push(({"returnType": match[1], "name": match[2], "argumentList": argumentList, "glVersion": currentProcessedVersion}));
 		}
 	}
 });
@@ -247,6 +255,8 @@ DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) 
 
     return ret;
 }
+
+#ifdef GL_VERSION_2_0
 
 /* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getProgramParameter */
 DUK_LOCAL void dukwebgl_push_boolean_program_parameter(duk_context *ctx, GLuint program, GLenum pname) {
@@ -419,12 +429,26 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createTexture(duk_context *ctx) {
 
     return 1;
 }
+
+#endif /* GL_VERSION_2_0 */
+
 `;
 
 var mappedMethodCount = 0;
+
+glVersionList.forEach(glVersion => {
+	cResult += `\n#ifdef ${glVersion}\n`
 methods.forEach(m => {
+	if (m.cMethod) {
+		if (glVersion !== m.cMethod.glVersion) {
+			return;
+		}
+	}
 	if (!m.cMethod) {
-		cResult += `${pad}/* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) */\n`;
+		if (glVersion.endsWith("0_0")) {
+			// complain only once
+			cResult += `${pad}/* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) */\n`;
+		}
 		return;
 	}
 
@@ -484,25 +508,41 @@ methods.forEach(m => {
 	m.definitionGenerated = true;
 	mappedMethodCount++;
 });
+	cResult += `#endif /* ${glVersion} */\n`
+});
+
 
 	cResult += `
 DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
     duk_idx_t obj = duk_push_object(ctx);
 
     if (duk_is_constructor_call(ctx)) {\n`;
-	Object.entries(customWebGlBindingImplementations).forEach(entry => {
-		let key = entry[0];
-		let value = entry[1];
-		cResult += `${pad}${pad}dukwebgl_bind_function(ctx, custom_impl_${key}, ${key}, ${value.argumentCount});\n`;
-	});
+	glVersionList.forEach(glVersion => {
+		cResult += `\n#ifdef ${glVersion}\n`
+		Object.entries(customWebGlBindingImplementations).forEach(entry => {
+			let key = entry[0];
+			let value = entry[1];
 
-	methods.forEach(m => {
-		if (m.definitionGenerated !== true) {
-			return;
-		}
+			if (value.glVersion !== glVersion) {
+				return;
+			}
 
-		// has a C function definition, binding can be done
-		cResult += `${pad}${pad}dukwebgl_bind_function(ctx, ${m.cMethod.name}, ${m.name}, ${m.cMethod.argumentList.length});\n`;
+			cResult += `${pad}${pad}dukwebgl_bind_function(ctx, custom_impl_${key}, ${key}, ${value.argumentCount});\n`;
+		});
+
+		methods.forEach(m => {
+			if (m.definitionGenerated !== true) {
+				return;
+			}
+
+			if (m.cMethod.glVersion !== glVersion) {
+				return;
+			}
+
+			// has a C function definition, binding can be done
+			cResult += `${pad}${pad}dukwebgl_bind_function(ctx, ${m.cMethod.name}, ${m.name}, ${m.cMethod.argumentList.length});\n`;
+		});
+		cResult += `#endif /* ${glVersion} */\n`
 	});
 	
 	cResult += `
