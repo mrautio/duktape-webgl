@@ -6,12 +6,16 @@
   * duktape-webgl runs desktop [OpenGL Core Profile](https://www.khronos.org/opengl/) beneath, not [OpenGL ES](https://www.khronos.org/opengles/) to which WebGL is based.
 * If you're looking for [OpenGL 1.x](https://www.khronos.org/registry/OpenGL/specs/gl/glspec13.pdf) legacy bindings, check [duktape-opengl project](https://github.com/mrautio/duktape-opengl).
 
+## License
+
+Zlib (similar to MIT)
+
 ## Setup
 * Include dukwebgl.h to your Duktape & OpenGL project.
 
 ### C initialization example
 
-```
+```C
 // Applicable OpenGL header needs to be included before dukwebgl
 #include <GL/glcorearb.h>
 
@@ -28,12 +32,28 @@ dukwebgl_bind(ctx);
 ```
 
 ### JS initialization example
-```
+```js
 var gl = new WebGL2RenderingContext();
 // now you should be able to call WebGL methods as you wish
 ```
 
+## API general design
+
+* JS API should resemble to WebGL specifications as much as possible
+  * Contradicting / differing OpenGL call logic should be in favor of WebGL specifications
+* C API should be minimal, yet allowing some flexibility for power-users
+* Comply to intersection of OpenGL core C API headers and WebGL 1.x - 2.x APIs
+  * Only support WebGL constants defined in the C API
+  * Only support WebGL functions, that can be "straightforward" mapped to C API call
+  * Users should have possibility to restrict API imports based on OpenGL core version, i.e. via define/undef 
+* Performance over validity
+  * Does not validate input
+    * Duktape context is assumed to be valid
+    * Variables passed from JS are assumed to be valid for intended OpenGL API calls
+  * Will attempt to pass calls to underlying OpenGL C API functions with low overhead.
+
 ## Generating duktape-webgl header
+
 * As an end user, you should just download latest pre-generated header file. Generator is meant for development.
 * If you want to generate content then by all means. This is done using Docker:
 
