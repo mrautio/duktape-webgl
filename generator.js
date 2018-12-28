@@ -67,6 +67,10 @@ var glTypeDukTypeReturnFunctionMap = {
 	"WebGLUniformLocation": function() { return `dukwebgl_create_object_int(ctx, ret)` },
 };
 
+var customWebGlBindingImplementations = {
+	"getProgramParameter": {"argumentCount": 2}
+};
+
 var constantRegExp = new RegExp(/#\s*define\s+([\w\d_]+)\s+([\w\d-]+)/);
 var methodRegExp = new RegExp(/GLAPI\s+([\w\d_]+)\s+APIENTRY\s+([\w\d-]+)\s*\(\s*([\w\d\s_,*]+)\s*\)\s*;/);
 var argumentRegExp = new RegExp(/([\w\d]+\**)\s*([\w\d]+)/);
@@ -232,6 +236,83 @@ DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) 
 
     return ret;
 }
+
+/* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getProgramParameter */
+DUK_LOCAL void dukwebgl_push_boolean_program_parameter(duk_context *ctx, GLuint program, GLenum pname) {
+    GLint value = 0; 
+    glGetProgramiv(program, pname, &value);
+    duk_push_boolean(ctx, value == GL_TRUE ? 1 : 0);
+}
+DUK_LOCAL void dukwebgl_push_int_program_parameter(duk_context *ctx, GLuint program, GLenum pname) {
+    GLint value = 0; 
+    glGetProgramiv(program, pname, &value);
+    duk_push_int(ctx, value);
+}
+DUK_LOCAL void dukwebgl_push_uint_program_parameter(duk_context *ctx, GLuint program, GLenum pname) {
+    GLint value = 0; 
+    glGetProgramiv(program, pname, &value);
+    duk_push_uint(ctx, (unsigned int)value);
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getProgramParameter(duk_context *ctx) {
+    GLuint program = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+    GLenum pname = (GLenum)duk_get_uint(ctx, 1);
+
+    int type = 0;
+    switch(pname) {
+#ifdef GL_DELETE_STATUS
+        case GL_DELETE_STATUS:
+            dukwebgl_push_boolean_program_parameter(ctx, program, pname);
+            break;
+#endif
+#ifdef GL_LINK_STATUS
+        case GL_LINK_STATUS:
+            dukwebgl_push_boolean_program_parameter(ctx, program, pname);
+            break;
+#endif
+#ifdef GL_VALIDATE_STATUS
+        case GL_VALIDATE_STATUS:
+            dukwebgl_push_boolean_program_parameter(ctx, program, pname);
+            break;
+#endif
+#ifdef GL_ATTACHED_SHADERS
+        case GL_ATTACHED_SHADERS:
+            dukwebgl_push_int_program_parameter(ctx, program, pname);
+            break;
+#endif
+#ifdef GL_ACTIVE_ATTRIBUTES
+        case GL_ACTIVE_ATTRIBUTES:
+            dukwebgl_push_int_program_parameter(ctx, program, pname);
+            break;
+#endif
+#ifdef GL_ACTIVE_UNIFORMS
+        case GL_ACTIVE_UNIFORMS:
+            dukwebgl_push_int_program_parameter(ctx, program, pname);
+            break;
+#endif
+#ifdef GL_TRANSFORM_FEEDBACK_BUFFER_MODE
+        case GL_TRANSFORM_FEEDBACK_BUFFER_MODE:
+            dukwebgl_push_uint_program_parameter(ctx, program, pname);
+            break;
+#endif
+#ifdef GL_TRANSFORM_FEEDBACK_VARYINGS
+        case GL_TRANSFORM_FEEDBACK_VARYINGS:
+            dukwebgl_push_int_program_parameter(ctx, program, pname);
+            break;
+#endif
+#ifdef GL_ACTIVE_UNIFORM_BLOCKS
+        case GL_ACTIVE_UNIFORM_BLOCKS:
+            dukwebgl_push_int_program_parameter(ctx, program, pname);
+            break;
+#endif
+        default:
+            /* Unknown parameter case not defined by the MDN specs */
+            duk_push_undefined(ctx);
+            break;
+    }
+
+    return 1;
+}
 `;
 
 var mappedMethodCount = 0;
@@ -301,6 +382,12 @@ DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
     duk_idx_t obj = duk_push_object(ctx);
 
     if (duk_is_constructor_call(ctx)) {\n`;
+	Object.entries(customWebGlBindingImplementations).forEach(entry => {
+		let key = entry[0];
+		let value = entry[1];
+		cResult += `${pad}${pad}dukwebgl_bind_function(ctx, custom_impl_${key}, ${key}, ${value.argumentCount});\n`;
+	});
+
 	methods.forEach(m => {
 		if (!m.cMethod) {
 			cResult += `${pad}${pad}/* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) */\n`;
@@ -356,6 +443,11 @@ function processMethod(element) {
 	var returnType = body.idlType.idlType;
 	var name = body.name.value;
 	var argumentList = [];
+
+	if (name in customWebGlBindingImplementations) {
+		// custom implementation, do not process automatically
+		return;
+	}
 
 	if ("arguments" in body) {
 		body.arguments.forEach(argument => {
