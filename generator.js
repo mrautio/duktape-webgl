@@ -68,7 +68,11 @@ var glTypeDukTypeReturnFunctionMap = {
 };
 
 var customWebGlBindingImplementations = {
-	"getProgramParameter": {"argumentCount": 2}
+	"getProgramParameter": {"argumentCount": 2},
+	"getProgramInfoLog": {"argumentCount": 1},
+	"shaderSource": {"argumentCount": 2},
+	"getShaderParameter": {"argumentCount": 2},
+	"getShaderInfoLog": {"argumentCount": 1},
 };
 
 var constantRegExp = new RegExp(/#\s*define\s+([\w\d_]+)\s+([\w\d-]+)/);
@@ -253,12 +257,10 @@ DUK_LOCAL void dukwebgl_push_uint_program_parameter(duk_context *ctx, GLuint pro
     glGetProgramiv(program, pname, &value);
     duk_push_uint(ctx, (unsigned int)value);
 }
-
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getProgramParameter(duk_context *ctx) {
     GLuint program = dukwebgl_get_webgl_object_id_uint(ctx, 0);
     GLenum pname = (GLenum)duk_get_uint(ctx, 1);
 
-    int type = 0;
     switch(pname) {
 #ifdef GL_DELETE_STATUS
         case GL_DELETE_STATUS:
@@ -312,6 +314,83 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getProgramParameter(duk_context *ctx) {
     }
 
     return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getProgramInfoLog(duk_context *ctx) {
+    GLuint program = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+
+    const GLsizei maxLength = 4096;
+    GLchar infoLog[maxLength];
+    GLsizei length = 0;
+
+    glGetProgramInfoLog(program, maxLength, &length, infoLog);
+
+    duk_push_string(ctx, (const char*)infoLog);
+
+    return 1;
+}
+
+/* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getShaderParameter */
+DUK_LOCAL void dukwebgl_push_boolean_shader_parameter(duk_context *ctx, GLuint program, GLenum pname) {
+    GLint value = 0; 
+    glGetShaderiv(program, pname, &value);
+    duk_push_boolean(ctx, value == GL_TRUE ? 1 : 0);
+}
+DUK_LOCAL void dukwebgl_push_uint_shader_parameter(duk_context *ctx, GLuint program, GLenum pname) {
+    GLint value = 0; 
+    glGetShaderiv(program, pname, &value);
+    duk_push_uint(ctx, (unsigned int)value);
+}
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getShaderParameter(duk_context *ctx) {
+    GLuint shader = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+    GLenum pname = (GLenum)duk_get_uint(ctx, 1);
+
+    switch(pname) {
+#ifdef GL_DELETE_STATUS
+        case GL_DELETE_STATUS:
+            dukwebgl_push_boolean_shader_parameter(ctx, shader, pname);
+            break;
+#endif
+#ifdef GL_COMPILE_STATUS
+        case GL_COMPILE_STATUS:
+            dukwebgl_push_boolean_shader_parameter(ctx, shader, pname);
+            break;
+#endif
+#ifdef GL_SHADER_TYPE
+        case GL_SHADER_TYPE:
+            dukwebgl_push_uint_shader_parameter(ctx, shader, pname);
+            break;
+#endif
+        default:
+            /* Unknown parameter case not defined by the MDN specs */
+            duk_push_undefined(ctx);
+            break;
+    }
+
+    return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getShaderInfoLog(duk_context *ctx) {
+    GLuint shader = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+
+    const GLsizei maxLength = 4096;
+    GLchar infoLog[maxLength];
+    GLsizei length = 0;
+
+    glGetShaderInfoLog(shader, maxLength, &length, infoLog);
+
+    duk_push_string(ctx, (const char*)infoLog);
+
+    return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_shaderSource(duk_context *ctx) {
+    GLuint shader = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+    const GLchar *string = (const GLchar *)duk_get_string(ctx, 1);
+
+    glShaderSource(shader, 1, &string, NULL);
+
+    return 0;
 }
 `;
 
