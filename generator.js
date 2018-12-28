@@ -35,6 +35,7 @@ var glTypeDukTypeMap = {
     "GLdouble": "number",
     "GLclampd": "number",
     "GLhalfNV": "uint",
+    "DOMString": "string",
 };
 
 var glTypeDukTypeParameterFunctionMap = {
@@ -73,11 +74,13 @@ var customWebGlBindingImplementations = {
 	"shaderSource": {"argumentCount": 2},
 	"getShaderParameter": {"argumentCount": 2},
 	"getShaderInfoLog": {"argumentCount": 1},
+	"createBuffer": {"argumentCount": 0},
+	"createTexture": {"argumentCount": 0},
 };
 
 var constantRegExp = new RegExp(/#\s*define\s+([\w\d_]+)\s+([\w\d-]+)/);
 var methodRegExp = new RegExp(/GLAPI\s+([\w\d_]+)\s+APIENTRY\s+([\w\d-]+)\s*\(\s*([\w\d\s_,*]+)\s*\)\s*;/);
-var argumentRegExp = new RegExp(/([\w\d]+\**)\s*([\w\d]+)/);
+var argumentRegExp = new RegExp(/(const\s+)?([\w\d]+\s*\**)\s*([\w\d]+)/);
 glCHeader.split("\n").forEach(line => {
 	var match = constantRegExp.exec(line);
 	if (match) {
@@ -92,11 +95,14 @@ glCHeader.split("\n").forEach(line => {
 				}
 
 				var arg = {"original": argumentString};
-				argumentString.replace(/const\s+/g,"");
-				argumentString.replace(/\s*\*\s*/g,"*");
 				var match = argumentRegExp.exec(argumentString);
-				arg.type = match[1];
-				arg.variableName = match[2];
+				arg.type = "";
+				if (match[1]) {
+					arg.type += match[1];
+				}
+				arg.type += match[2];
+				arg.type = arg.type.trim();
+				arg.variableName = match[3].trim();
 
 				if (arg.variableName == "" || arg.type == "") {
 					return;
@@ -392,6 +398,26 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_shaderSource(duk_context *ctx) {
 
     return 0;
 }
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createBuffer(duk_context *ctx) {
+    GLuint buffers[1];
+
+    glGenBuffers(1, buffers);
+
+    dukwebgl_create_object_uint(ctx, buffers[0]);
+
+    return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createTexture(duk_context *ctx) {
+    GLuint textures[1];
+
+    glGenTextures(1, textures);
+
+    dukwebgl_create_object_uint(ctx, textures[0]);
+
+    return 1;
+}
 `;
 
 var mappedMethodCount = 0;
@@ -425,6 +451,7 @@ methods.forEach(m => {
 				cResult += `${pad}/* Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.name}. argument: ${argument.type} vs. ${cArgument.type} */`;
 				return;
 			}
+
 			cResultArguments += `(${cArgument.type})duk_get_${dukInputArgumentType}(ctx, ${i}); // ${argument.original} & ${cArgument.original}\n`
 		}
 
