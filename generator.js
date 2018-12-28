@@ -36,6 +36,7 @@ var glTypeDukTypeMap = {
     "GLclampd": "number",
     "GLhalfNV": "uint",
     "DOMString": "string",
+    "GLintptr": "int",
 };
 
 var glTypeDukTypeParameterFunctionMap = {
