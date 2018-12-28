@@ -481,6 +481,7 @@ methods.forEach(m => {
 	cResult += `${pad}return ${returnVariable ? 1 : 0};\n`;
 	cResult += `}\n`;
 
+	m.definitionGenerated = true;
 	mappedMethodCount++;
 });
 
@@ -496,11 +497,11 @@ DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
 	});
 
 	methods.forEach(m => {
-		if (!m.cMethod) {
-			cResult += `${pad}${pad}/* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) */\n`;
+		if (m.definitionGenerated !== true) {
 			return;
 		}
 
+		// has a C function definition, binding can be done
 		cResult += `${pad}${pad}dukwebgl_bind_function(ctx, ${m.cMethod.name}, ${m.name}, ${m.cMethod.argumentList.length});\n`;
 	});
 	
