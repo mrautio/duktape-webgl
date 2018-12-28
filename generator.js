@@ -37,9 +37,34 @@ var glTypeDukTypeMap = {
     "GLhalfNV": "uint",
 };
 
-var glTypeDukTypeFunctionMap = {
-	"WebGLProgram": function() { return `dukwebgl_create_object(ctx, ret);` },
-	"WebGLShader": function() { return `dukwebgl_create_object(ctx, ret);` },
+var glTypeDukTypeParameterFunctionMap = {
+	"WebGLProgram": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLShader": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLRenderbuffer": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLTexture": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLFramebuffer": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLBuffer": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLVertexArrayObject": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLTransformFeedback": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLSampler": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLQuery": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+	"WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_int(ctx, ${index})` },
+};
+
+var glTypeDukTypeReturnFunctionMap = {
+	"WebGLProgram": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLShader": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLUniformLocation": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLRenderbuffer": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLTexture": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLFramebuffer": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLBuffer": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLVertexArrayObject": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLTransformFeedback": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLSampler": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLQuery": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+	"WebGLUniformLocation": function() { return `dukwebgl_create_object_int(ctx, ret)` },
 };
 
 var constantRegExp = new RegExp(/#\s*define\s+([\w\d_]+)\s+([\w\d-]+)/);
@@ -114,6 +139,10 @@ function processIdlToHeader(idl) {
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
+#if !defined(DUK_EXTERNAL_DECL) || !defined(DUK_LOCAL)
+#error "Duktape constants not found. Duktape header must be included before dukwebgl!"
+#endif
+
 #if !defined(DUKWEBGL_H_INCLUDED)
 #define DUKWEBGL_H_INCLUDED
 
@@ -123,10 +152,6 @@ function processIdlToHeader(idl) {
 
 #if defined(__cplusplus)
 extern "C" {
-#endif
-
-#if !defined(DUK_EXTERNAL_DECL) || !defined(DUK_LOCAL)
-#error "Duktape constants not found. Duktape header must be included before dukwebgl!"
 #endif
 
 DUK_EXTERNAL_DECL void dukwebgl_bind(duk_context *ctx);
@@ -174,7 +199,7 @@ ${pad} */
 	cResult += `
 } /* dukwebgl_bind_constants */
 
-DUK_LOCAL duk_idx_t dukwebgl_create_object(duk_context *ctx, GLuint id) {
+DUK_LOCAL duk_idx_t dukwebgl_create_object_uint(duk_context *ctx, GLuint id) {
     duk_idx_t obj = duk_push_object(ctx);
     
     duk_push_uint(ctx, id);
@@ -182,7 +207,32 @@ DUK_LOCAL duk_idx_t dukwebgl_create_object(duk_context *ctx, GLuint id) {
 
     return obj;
 }
-`
+
+DUK_LOCAL GLuint dukwebgl_get_object_id_uint(duk_context *ctx, duk_idx_t obj_idx) {
+    duk_get_prop_string(ctx, obj_idx, "_id");
+    GLuint ret = (GLuint)duk_to_uint(ctx, -1);
+    duk_pop(ctx);
+
+    return ret;
+}
+
+DUK_LOCAL duk_idx_t dukwebgl_create_object_int(duk_context *ctx, GLint id) {
+    duk_idx_t obj = duk_push_object(ctx);
+    
+    duk_push_int(ctx, id);
+    duk_put_prop_string(ctx, obj, "_id");
+
+    return obj;
+}
+
+DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) {
+    duk_get_prop_string(ctx, obj_idx, "_id");
+    GLint ret = (GLint)duk_to_int(ctx, -1);
+    duk_pop(ctx);
+
+    return ret;
+}
+`;
 
 var mappedMethodCount = 0;
 methods.forEach(m => {
@@ -206,13 +256,18 @@ methods.forEach(m => {
 	for (var i = 0; i < m.cMethod.argumentList.length; i++) {
 		var argument = m.argumentList[i];
 		var cArgument = m.cMethod.argumentList[i];
-		var dukInputArgumentType = glTypeDukTypeMap[cArgument.type];
-		if (!dukInputArgumentType) {
-			cResult += `${pad}/* Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.name}. argument: ${argument.type} vs. ${cArgument.type} */`;
-			return;
+		cResultArguments += `${pad}${cArgument.type} ${cArgument.variableName} = `
+		if (argument.type in glTypeDukTypeParameterFunctionMap) {
+			cResultArguments += `(${cArgument.type})${glTypeDukTypeParameterFunctionMap[argument.type](i)}; // ${argument.original} & ${cArgument.original}\n`
+		} else {
+			var dukInputArgumentType = glTypeDukTypeMap[argument.type];
+			if (!dukInputArgumentType) {
+				cResult += `${pad}/* Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.name}. argument: ${argument.type} vs. ${cArgument.type} */`;
+				return;
+			}
+			cResultArguments += `(${cArgument.type})duk_get_${dukInputArgumentType}(ctx, ${i}); // ${argument.original} & ${cArgument.original}\n`
 		}
 
-		cResultArguments += `${pad}${cArgument.type} ${cArgument.variableName} = (${cArgument.type})duk_get_${dukInputArgumentType}(ctx, ${i}); // ${argument.original} & ${cArgument.original}\n`
 		cCallVariables.push(`${cArgument.variableName}`);
 	}
 
@@ -224,8 +279,8 @@ methods.forEach(m => {
 	if (returnVariable) {
 		var dukReturnType = glTypeDukTypeMap[m.cMethod.returnType];
 		cResult += `${pad}${m.cMethod.returnType} ret = ${cCall};\n`;
-		if (m.returnType in glTypeDukTypeFunctionMap) {
-			cResult += `${pad}${glTypeDukTypeFunctionMap[m.returnType]()}\n`;
+		if (m.returnType in glTypeDukTypeReturnFunctionMap) {
+			cResult += `${pad}${glTypeDukTypeReturnFunctionMap[m.returnType]()};\n`;
 		} else if (m.returnType === m.cMethod.returnType) {
 			cResult += `${pad}duk_push_${dukReturnType}(ctx, ret);\n`;
 		} else {
