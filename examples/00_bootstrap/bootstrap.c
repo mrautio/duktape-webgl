@@ -1,19 +1,7 @@
 /**
  * Duktape-WebGL, Duktape, SDL, GLEW, OpenGL bootstrap program
  * Expects 0..N files as command line arguments.
- *
- * Following special purpose functions may be defined:
- * - function init() - is called before entering draw loop, i.e. initialize shaders and so here
- * - function draw() - is per every rendered frame, i.e. should call drawing routines here
- * - function cleanup() - is called when exiting, i.e. should contain cleanup call, like deleting textures and shaders from GPU memory
- *
- * To programatically exit from javascript, following function has been pre-defined:
- * - function exit(boolean success) - true = EXIT_SUCCESS, false = EXIT_FAILURE, this will call cleanup(), if defined
- *
- * Compile example: make
- * Usage example: ./bootstrap file1.js file2.js
- *
- * Example license: Public Domain, CC0 https://creativecommons.org/publicdomain/zero/1.0/
+ * See README.md for further details
  */
 
 #include <stdio.h>
@@ -30,8 +18,25 @@
 #include <duktape.h>
 
 /* Include duktape-webgl */
-/*#define DUKWEBGL_IMPLEMENTATION
-#include "dukwebgl.h"*/
+#define DUKWEBGL_IMPLEMENTATION
+#include "dukwebgl.h"
+
+#ifndef BOOTSTRAP_OPENGL_MAJOR_VERSION
+#define BOOTSTRAP_OPENGL_MAJOR_VERSION 3
+#endif
+
+#ifndef BOOTSTRAP_OPENGL_MINOR_VERSION
+#define BOOTSTRAP_OPENGL_MINOR_VERSION 2
+#endif
+
+#ifndef BOOTSTRAP_WINDOW_WIDTH
+#define BOOTSTRAP_WINDOW_WIDTH 640
+#endif
+
+#ifndef BOOTSTRAP_WINDOW_HEIGHT
+#define BOOTSTRAP_WINDOW_HEIGHT 480
+#endif
+
 
 static SDL_Window *window = NULL;
 static SDL_GLContext sdl_gl_ctx = NULL;
@@ -96,21 +101,24 @@ int main (int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	SDL_Window *window = SDL_CreateWindow("duktape-webgl test", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,  640, 480, SDL_WINDOW_OPENGL);
+	window = SDL_CreateWindow("duktape-webgl test",
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+		BOOTSTRAP_WINDOW_WIDTH, BOOTSTRAP_WINDOW_HEIGHT,
+		SDL_WINDOW_OPENGL);
 	if (window == NULL) {
 		printf("Could not create SDL window: %s\n", SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
 
-	SDL_GLContext sdl_gl_ctx = SDL_GL_CreateContext(window);
+	sdl_gl_ctx = SDL_GL_CreateContext(window);
 	if (sdl_gl_ctx == NULL) {
 		printf("Could not create SDL OpenGL context: %s\n", SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, BOOTSTRAP_OPENGL_MAJOR_VERSION);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, BOOTSTRAP_OPENGL_MINOR_VERSION);
 
 	glewExperimental = GL_TRUE;
 	GLenum ret = glewInit();
@@ -119,27 +127,35 @@ int main (int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	duk_context *ctx = duk_create_heap_default();
+	ctx = duk_create_heap_default();
 	if (!ctx) {
 		fprintf(stderr, "Failed to create Duktape heap\n");
 		exit(EXIT_FAILURE);
 	}
 
-	/* bind c_js_exit function as "bootstrapExit" in Duktape context to global object */
 	duk_push_global_object(ctx);
+
+	/* bind c_js_exit function as "bootstrapExit" in Duktape context to global object */
 	duk_push_c_function(ctx, c_js_exit, 1);
 	duk_put_prop_string(ctx, -2, "bootstrapExit");
-	duk_pop(ctx);
+
+	/* define window dimensions */
+	duk_push_uint(ctx, BOOTSTRAP_WINDOW_WIDTH);
+	duk_put_prop_string(ctx, -2, "BOOTSTRAP_WINDOW_WIDTH");
+	duk_push_uint(ctx, BOOTSTRAP_WINDOW_HEIGHT);
+	duk_put_prop_string(ctx, -2, "BOOTSTRAP_WINDOW_HEIGHT");
 
 	/* Create duktape-webgl bindings to current Duktape context */
-/*	dukwebgl_bind(ctx);*/
+	dukwebgl_bind(ctx);
+
+	duk_pop(ctx);
 
 	int i;
 	for (i = 1; i < argc; i++) {
 		/* read file contents into memory */
 		const char *file = argv[i];
 
-		FILE *f = fopen(file, "rb");
+		f = fopen(file, "rb");
 		if (f == NULL) {
 			fprintf(stderr, "Could not open file for read: %s\n", file);
 			exit(EXIT_FAILURE);
@@ -153,7 +169,7 @@ int main (int argc, char **argv) {
 		}
 		fseek(f, 0, SEEK_SET);
 
-		char *data = (char*)malloc(sizeof(char) * size);
+		data = (char*)calloc(sizeof(char), (size + 1));
 		if (data == NULL) {
 			fprintf(stderr, "Could allocate memory to read file: %s\n", file);
 			exit(EXIT_FAILURE);
