@@ -36,7 +36,6 @@ var glTypeDukTypeMap = {
     "GLclampd": "number",
     "GLhalfNV": "uint",
     "DOMString": "string",
-    "GLintptr": "int",
 };
 
 var glTypeDukTypeParameterFunctionMap = {
@@ -52,6 +51,7 @@ var glTypeDukTypeParameterFunctionMap = {
 	"WebGLSampler": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
 	"WebGLQuery": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
 	"WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_int(ctx, ${index})` },
+	"GLintptr": function(index) { return `(NULL + duk_get_int(ctx, ${index}))` },
 };
 
 var glTypeDukTypeReturnFunctionMap = {
@@ -77,6 +77,11 @@ var customWebGlBindingImplementations = {
 	"getShaderInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
 	"createBuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
 	"createTexture": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
+};
+
+var customWebGlConstantImplementations = {
+	//WebGL = -1, OpenGL: 0xFFFFFFFFFFFFFFFFull (=bigger than duktape uint)
+	"TIMEOUT_IGNORED": {"skip": true}
 };
 
 var constantRegExp = new RegExp(/#\s*define\s+([\w\d_]+)\s+([\w\d-]+)/);
@@ -162,8 +167,12 @@ function processIdlToHeader(idl) {
  * 3. This notice may not be removed or altered from any source distribution.
  */
 
-#if !defined(DUK_EXTERNAL_DECL) || !defined(DUK_LOCAL)
+#if !defined(DUK_EXTERNAL_DECL) || !defined(DUK_LOCAL)
 #error "Duktape constants not found. Duktape header must be included before dukwebgl!"
+#endif
+
+#if !defined(DUK_VERSION) || (DUK_VERSION < 20000)
+#error "Duktape 2.0.0 is required in minimum"
 #endif
 
 #if !defined(DUKWEBGL_H_INCLUDED)
@@ -196,6 +205,11 @@ DUK_EXTERNAL_DECL void dukwebgl_bind(duk_context *ctx);
 #error "OpenGL constants not found. OpenGL header must be included before dukwebgl!"
 #endif
 
+/* GLEW does not define GL_VERSION_1_0 but glcorearb.h does */
+#if defined(GLEW_VERSION_1_1) && !defined(GL_VERSION_1_0)
+#define GL_VERSION_1_0
+#endif
+
 #define dukwebgl_bind_function(ctx, c_function_name, js_function_name, argument_count) \
 ${pad}duk_push_c_function((ctx), dukwebgl_##c_function_name, (argument_count)); \
 ${pad}duk_put_prop_string((ctx), -2, #js_function_name)
@@ -213,6 +227,10 @@ ${pad} */
 	`;
 
 	constants.forEach(c => {
+		if (c.name in customWebGlConstantImplementations && customWebGlConstantImplementations[c.name].skip === true) {
+			cResult += `/* NOT IMPLEMENTED: ${c.name} */\n`;
+			return;
+		}
 
 		cResult += `#ifdef GL_${c.name}\n`;
 		cResult += `${pad}dukwebgl_push_constant_property(ctx, ${c.name});\n`;
@@ -275,7 +293,7 @@ DUK_LOCAL void dukwebgl_push_uint_program_parameter(duk_context *ctx, GLuint pro
     duk_push_uint(ctx, (unsigned int)value);
 }
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getProgramParameter(duk_context *ctx) {
-    GLuint program = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+    GLuint program = dukwebgl_get_object_id_uint(ctx, 0);
     GLenum pname = (GLenum)duk_get_uint(ctx, 1);
 
     switch(pname) {
@@ -334,7 +352,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getProgramParameter(duk_context *ctx) {
 }
 
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getProgramInfoLog(duk_context *ctx) {
-    GLuint program = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+    GLuint program = dukwebgl_get_object_id_uint(ctx, 0);
 
     const GLsizei maxLength = 4096;
     GLchar infoLog[maxLength];
@@ -359,7 +377,7 @@ DUK_LOCAL void dukwebgl_push_uint_shader_parameter(duk_context *ctx, GLuint prog
     duk_push_uint(ctx, (unsigned int)value);
 }
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getShaderParameter(duk_context *ctx) {
-    GLuint shader = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+    GLuint shader = dukwebgl_get_object_id_uint(ctx, 0);
     GLenum pname = (GLenum)duk_get_uint(ctx, 1);
 
     switch(pname) {
@@ -388,7 +406,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getShaderParameter(duk_context *ctx) {
 }
 
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getShaderInfoLog(duk_context *ctx) {
-    GLuint shader = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+    GLuint shader = dukwebgl_get_object_id_uint(ctx, 0);
 
     const GLsizei maxLength = 4096;
     GLchar infoLog[maxLength];
@@ -402,7 +420,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getShaderInfoLog(duk_context *ctx) {
 }
 
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_shaderSource(duk_context *ctx) {
-    GLuint shader = dukwebgl_get_webgl_object_id_uint(ctx, 0);
+    GLuint shader = dukwebgl_get_object_id_uint(ctx, 0);
     const GLchar *string = (const GLchar *)duk_get_string(ctx, 1);
 
     glShaderSource(shader, 1, &string, NULL);
@@ -469,7 +487,7 @@ methods.forEach(m => {
 		var cArgument = m.cMethod.argumentList[i];
 		cResultArguments += `${pad}${cArgument.type} ${cArgument.variableName} = `
 		if (argument.type in glTypeDukTypeParameterFunctionMap) {
-			cResultArguments += `(${cArgument.type})${glTypeDukTypeParameterFunctionMap[argument.type](i)}; // ${argument.original} & ${cArgument.original}\n`
+			cResultArguments += `(${cArgument.type})${glTypeDukTypeParameterFunctionMap[argument.type](i)};\n`
 		} else {
 			var dukInputArgumentType = glTypeDukTypeMap[argument.type];
 			if (!dukInputArgumentType) {
@@ -477,7 +495,7 @@ methods.forEach(m => {
 				return;
 			}
 
-			cResultArguments += `(${cArgument.type})duk_get_${dukInputArgumentType}(ctx, ${i}); // ${argument.original} & ${cArgument.original}\n`
+			cResultArguments += `(${cArgument.type})duk_get_${dukInputArgumentType}(ctx, ${i});\n`
 		}
 
 		cCallVariables.push(`${cArgument.variableName}`);
@@ -514,7 +532,7 @@ methods.forEach(m => {
 
 	cResult += `
 DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
-    duk_idx_t obj = duk_push_object(ctx);
+    duk_push_object(ctx);
 
     if (duk_is_constructor_call(ctx)) {\n`;
 	glVersionList.forEach(glVersion => {
@@ -606,11 +624,9 @@ function processMethod(element) {
 
 	var cMethodName = "gl" + name[0].toUpperCase() + name.slice(1); 
 	var cMethod = cMethods.find(c => c.name === cMethodName && c.argumentList.length === argumentList.length);
-	if (!cMethod) {
-		//FIXME: Many plural forms turned into singulars in WebGl, some handling needs to be figured out
-		//FIXME: getInternalformatParameter => what is this?
-		//console.log(`Mehthod ${name}/${cMethodName} not defined in C header!`);
-	}
+	/*if (!cMethod) {
+		console.log(`Mehthod ${name}/${cMethodName} not defined in C header!`);
+	}*/
 	methods.push({"returnType": returnType, "name": name, "argumentList": argumentList, "cMethod": cMethod});
 }
 
