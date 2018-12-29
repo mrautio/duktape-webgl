@@ -6,5 +6,5 @@
 ## Docker build and run examples
 
 ```
-docker build -t duktape-webgl-examples . && docker run -t --read-only duktape-webgl-examples
+docker build -t duktape-webgl-examples . && docker run --rm -t duktape-webgl-examples
 ```
