@@ -16,18 +16,23 @@ Zlib (similar to MIT)
 ### C initialization example
 
 ```C
-// Applicable OpenGL header needs to be included before dukwebgl
+/* Applicable OpenGL header needs to be included before dukwebgl */
 #include <GL/glcorearb.h>
 
-// Duktape needs to be included before dukwebgl
+/* Duktape needs to be included before dukwebgl */
 #include "duktape.h"
 
-// DUKWEBGL_IMPLEMENTATION needs to be defined in *one* source file to create the implementation.
+/* DUKWEBGL_IMPLEMENTATION needs to be defined in *one* source file to create the implementation. */
 #define DUKWEBGL_IMPLEMENTATION 
 #include "dukwebgl.h"
 
 ...
+duk_push_global_object(ctx);
+
+/* duktape-webgl bindings will be added to the global object */
 dukwebgl_bind(ctx);
+
+duk_pop(ctx);
 ...
 ```
 

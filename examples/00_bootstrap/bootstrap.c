@@ -7,14 +7,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* includes glew and OpenGL headers */
+/* includes glew and OpenGL headers. OpenGL headers need to be included before duktape-webgl */
 #include <GL/glew.h>
 
 #include <SDL2/SDL.h>
 
-/* Enable Duktape stdout printing support */
-#define DUK_CMDLINE_PRINTALERT_SUPPORT
-#define DUK_CMDLINE_CONSOLE_SUPPORT
+/* Include Duktape before duktape-webgl */
 #include <duktape.h>
 
 /* Include duktape-webgl */
