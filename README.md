@@ -24,7 +24,7 @@ Zlib (similar to MIT)
 
 // DUKWEBGL_IMPLEMENTATION needs to be defined in *one* source file to create the implementation.
 #define DUKWEBGL_IMPLEMENTATION 
-#inlude "dukwebgl.h"
+#include "dukwebgl.h"
 
 ...
 dukwebgl_bind(ctx);
