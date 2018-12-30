@@ -1,0 +1,12 @@
+sudo: true
+dist: xenial
+
+jobs:
+  include:
+    - stage: generate dukwebgl C header
+      script:
+      - docker build -t duktape-webgl-generator .
+      - docker run -t --read-only duktape-webgl-generator > examples/00_bootstrap/dukwebgl.h
+    - stage: test dukwebgl
+      script:
+      - docker build -t duktape-webgl-examples examples
