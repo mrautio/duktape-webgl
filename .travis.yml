@@ -3,10 +3,13 @@ dist: xenial
 
 jobs:
   include:
-    - stage: generate dukwebgl C header
+    # artifacts do not persist between jobs so everything executed in single stage
+    - stage: test
       script:
+      # generate
       - docker build -t duktape-webgl-generator .
       - docker run -t --read-only duktape-webgl-generator > examples/00_bootstrap/dukwebgl.h
-    - stage: test dukwebgl
-      script:
+      # compile
       - docker build -t duktape-webgl-examples examples
+      # test
+      - docker run --rm -t duktape-webgl-examples

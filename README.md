@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/mrautio/duktape-webgl.png)](https://travis-ci.com/mrautio/duktape-webgl)
+
 # duktape-webgl
 [WebGL](https://www.khronos.org/webgl/) 2.0 bindings for [Duktape embeddable Javascript engine](http://duktape.org)
 
