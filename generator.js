@@ -558,7 +558,8 @@ methods.forEach(m => {
 DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
     duk_push_object(ctx);
 
-    if (duk_is_constructor_call(ctx)) {\n`;
+    if (duk_is_constructor_call(ctx)) {
+        dukwebgl_bind_constants(ctx);\n`;
 	glVersionList.forEach(glVersion => {
 		cResult += `\n#ifdef ${glVersion}\n`
 		Object.entries(customWebGlBindingImplementations).forEach(entry => {
@@ -599,7 +600,6 @@ DUK_LOCAL void dukwebgl_bind_methods(duk_context *ctx) {
 } /* dukwebgl_bind_methods */
 
 void dukwebgl_bind(duk_context *ctx) {
-    dukwebgl_bind_constants(ctx);
     dukwebgl_bind_methods(ctx);
 } /* dukwebgl_bind */
 
