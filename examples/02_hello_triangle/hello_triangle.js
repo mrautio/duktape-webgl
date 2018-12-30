@@ -92,7 +92,7 @@ function init() {
     gl.enableVertexAttribArray(0);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, gl.FALSE, 0, 0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 
     // background color to black
 
