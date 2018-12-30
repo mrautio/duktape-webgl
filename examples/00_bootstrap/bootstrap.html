@@ -1,0 +1,38 @@
+<html>
+    <!--
+      This is an implementation of the duktape-webgl application in HTML5 and JavaScript
+      -->
+    <meta charset="UTF-8"/>
+    <head>
+        <title>HTML5 WebGL2 Bootstrap</title>
+        <style type="text/css">
+            canvas {
+                width: 640px;
+                height: 480px;
+            }
+        </style>
+
+        <!-- The example we want to import -->
+        <script src="../02_hello_triangle/hello_triangle.js"></script>
+    </head>
+<body>
+
+<canvas id="screen"></canvas>
+  
+<script type="application/javascript">
+    function drawLoop() {
+        if (typeof draw === 'function') {
+            draw();
+        }
+
+        setTimeout(function() { window.requestAnimationFrame(drawLoop); }, 1);
+    }
+
+    if (typeof init === 'function') {
+        init();
+    }
+
+    drawLoop();
+</script>
+</body>
+</html>

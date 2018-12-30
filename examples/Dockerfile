@@ -9,6 +9,7 @@ COPY docker_entrypoint.sh .
 
 ADD 00_bootstrap 00_bootstrap
 ADD 01_grey_screen 01_grey_screen
+ADD 02_hello_triangle 02_hello_triangle
 
 RUN cd 00_bootstrap && make
 
