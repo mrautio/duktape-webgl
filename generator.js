@@ -129,7 +129,6 @@ glCHeader.split("\n").forEach(line => {
 	}
 });
 
-var pad = "    ";
 var cResult = "";
 var constants = [];
 var methods = [];
@@ -211,18 +210,18 @@ DUK_EXTERNAL_DECL void dukwebgl_bind(duk_context *ctx);
 #endif
 
 #define dukwebgl_bind_function(ctx, c_function_name, js_function_name, argument_count) \
-${pad}duk_push_c_function((ctx), dukwebgl_##c_function_name, (argument_count)); \
-${pad}duk_put_prop_string((ctx), -2, #js_function_name)
+    duk_push_c_function((ctx), dukwebgl_##c_function_name, (argument_count)); \
+    duk_put_prop_string((ctx), -2, #js_function_name)
 
 #define dukwebgl_push_constant_property(ctx, webgl_constant) \
-${pad}duk_push_uint((ctx), (GL_##webgl_constant)); \
-${pad}duk_put_prop_string((ctx), -2, #webgl_constant)
+    duk_push_uint((ctx), (GL_##webgl_constant)); \
+    duk_put_prop_string((ctx), -2, #webgl_constant)
 
 DUK_LOCAL void dukwebgl_bind_constants(duk_context *ctx) {
-${pad}/*  
-${pad} *  If constant is not defined in included OpenGL C headers, it will not be exported to JS object
-${pad} *  In practice many WebGL only constants, like UNPACK_FLIP_Y_WEBGL, are never exported
-${pad} */
+    /*  
+     *  If constant is not defined in included OpenGL C headers, it will not be exported to JS object
+     *  In practice many WebGL only constants, like UNPACK_FLIP_Y_WEBGL, are never exported
+     */
 
 	`;
 
@@ -233,7 +232,7 @@ ${pad} */
 		}
 
 		cResult += `#ifdef GL_${c.name}\n`;
-		cResult += `${pad}dukwebgl_push_constant_property(ctx, ${c.name});\n`;
+		cResult += `    dukwebgl_push_constant_property(ctx, ${c.name});\n`;
 		cResult += `#endif\n`;
 	});
 
@@ -465,7 +464,7 @@ methods.forEach(m => {
 	if (!m.cMethod) {
 		if (glVersion.endsWith("0_0")) {
 			// complain only once
-			cResult += `${pad}/* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) */\n`;
+			cResult += `    /* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) */\n`;
 		}
 		return;
 	}
@@ -475,7 +474,7 @@ methods.forEach(m => {
 		returnVariable = true;
 
 		if (!(m.cMethod.returnType in glTypeDukTypeMap)) {
-			cResult += `${pad}/* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) / ${m.cMethod.returnType} ${m.cMethod.name} (${JSON.stringify(m.cMethod.argumentList)}) */\n`;
+			cResult += `    /* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) / ${m.cMethod.returnType} ${m.cMethod.name} (${JSON.stringify(m.cMethod.argumentList)}) */\n`;
 			return;
 		}
 	}
@@ -485,13 +484,13 @@ methods.forEach(m => {
 	for (var i = 0; i < m.cMethod.argumentList.length; i++) {
 		var argument = m.argumentList[i];
 		var cArgument = m.cMethod.argumentList[i];
-		cResultArguments += `${pad}${cArgument.type} ${cArgument.variableName} = `
+		cResultArguments += `    ${cArgument.type} ${cArgument.variableName} = `
 		if (argument.type in glTypeDukTypeParameterFunctionMap) {
 			cResultArguments += `(${cArgument.type})${glTypeDukTypeParameterFunctionMap[argument.type](i)};\n`
 		} else {
 			var dukInputArgumentType = glTypeDukTypeMap[argument.type];
 			if (!dukInputArgumentType) {
-				cResult += `${pad}/* Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.name}. argument: ${argument.type} vs. ${cArgument.type} */`;
+				cResult += `    /* Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.name}. argument: ${argument.type} vs. ${cArgument.type} */`;
 				return;
 			}
 
@@ -508,19 +507,19 @@ methods.forEach(m => {
 
 	if (returnVariable) {
 		var dukReturnType = glTypeDukTypeMap[m.cMethod.returnType];
-		cResult += `${pad}${m.cMethod.returnType} ret = ${cCall};\n`;
+		cResult += `    ${m.cMethod.returnType} ret = ${cCall};\n`;
 		if (m.returnType in glTypeDukTypeReturnFunctionMap) {
-			cResult += `${pad}${glTypeDukTypeReturnFunctionMap[m.returnType]()};\n`;
+			cResult += `    ${glTypeDukTypeReturnFunctionMap[m.returnType]()};\n`;
 		} else if (m.returnType === m.cMethod.returnType) {
-			cResult += `${pad}duk_push_${dukReturnType}(ctx, ret);\n`;
+			cResult += `    duk_push_${dukReturnType}(ctx, ret);\n`;
 		} else {
 			throw `Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.returnType} ${m.cMethod.name}`;
 		}
 	} else {
-		cResult += `${pad}${cCall};\n`;
+		cResult += `    ${cCall};\n`;
 	}
 
-	cResult += `${pad}return ${returnVariable ? 1 : 0};\n`;
+	cResult += `    return ${returnVariable ? 1 : 0};\n`;
 	cResult += `}\n`;
 
 	m.definitionGenerated = true;
@@ -545,7 +544,7 @@ DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
 				return;
 			}
 
-			cResult += `${pad}${pad}dukwebgl_bind_function(ctx, custom_impl_${key}, ${key}, ${value.argumentCount});\n`;
+			cResult += `        dukwebgl_bind_function(ctx, custom_impl_${key}, ${key}, ${value.argumentCount});\n`;
 		});
 
 		methods.forEach(m => {
@@ -558,7 +557,7 @@ DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
 			}
 
 			// has a C function definition, binding can be done
-			cResult += `${pad}${pad}dukwebgl_bind_function(ctx, ${m.cMethod.name}, ${m.name}, ${m.cMethod.argumentList.length});\n`;
+			cResult += `        dukwebgl_bind_function(ctx, ${m.cMethod.name}, ${m.name}, ${m.cMethod.argumentList.length});\n`;
 		});
 		cResult += `#endif /* ${glVersion} */\n`
 	});
@@ -571,12 +570,12 @@ DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
 }
 
 DUK_LOCAL void dukwebgl_bind_methods(duk_context *ctx) {
-${pad}dukwebgl_bind_function(ctx, WebGL2RenderingContext, WebGL2RenderingContext, 0);
+    dukwebgl_bind_function(ctx, WebGL2RenderingContext, WebGL2RenderingContext, 0);
 } /* dukwebgl_bind_methods */
 
 void dukwebgl_bind(duk_context *ctx) {
-${pad}dukwebgl_bind_constants(ctx);
-${pad}dukwebgl_bind_methods(ctx);
+    dukwebgl_bind_constants(ctx);
+    dukwebgl_bind_methods(ctx);
 } /* dukwebgl_bind */
 
 #endif /* DUKWEBGL_IMPLEMENTATION */
