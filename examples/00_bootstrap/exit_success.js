@@ -1,12 +1,12 @@
 // init WebGL rendering context
 var gl = new WebGL2RenderingContext();
 if (!gl instanceof WebGL2RenderingContext) {
-	bootstrapExit(false);
+	throw 'WebGL2 not initialized succesfully'
 }
 
 // check that some OpenGL constants exist and are somewhat valid
-if (gl.TRUE === gl.FALSE) {
-	bootstrapExit(false);
+if (gl.COLOR_BUFFER_BIT === gl.DEPTH_BUFFER_BIT || !gl.COLOR_BUFFER_BIT || !gl.DEPTH_BUFFER_BIT) {
+	throw 'WebGL basic constants not found'
 }
 
 // call WebGL function
