@@ -16,8 +16,8 @@ var cMethods = [];
 
 var glTypeDukTypeMap = {
     "GLenum": "uint",
-    "GLboolean": "boolean",
     "GLbitfield": "uint",
+    "GLboolean": "boolean",
     "GLint": "int",
     "GLint64": "int",
     "GLint64EXT": "int",
@@ -52,6 +52,7 @@ var glTypeDukTypeParameterFunctionMap = {
 	"WebGLQuery": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
 	"WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_int(ctx, ${index})` },
 	"GLintptr": function(index) { return `(NULL + duk_get_int(ctx, ${index}))` },
+	"GLboolean": function(index) { return `(duk_get_boolean(ctx, ${index}) == 1 ? GL_TRUE : GL_FALSE)` },
 };
 
 var glTypeDukTypeReturnFunctionMap = {
@@ -67,6 +68,7 @@ var glTypeDukTypeReturnFunctionMap = {
 	"WebGLSampler": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
 	"WebGLQuery": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
 	"WebGLUniformLocation": function() { return `dukwebgl_create_object_int(ctx, ret)` },
+	"GLboolean": function(index) { return `duk_push_boolean(ctx, (ret == GL_TRUE ? 1 : 0))` },
 };
 
 var customWebGlBindingImplementations = {
