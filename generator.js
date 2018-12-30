@@ -93,11 +93,11 @@ var glVersionList = [currentProcessedVersion];
 glCHeader.split("\n").forEach(line => {
 	var match = constantRegExp.exec(line);
 	if (match) {
-		cConstants.push({"name":match[1], "value":match[2]});
 		if (match[1].startsWith("GL_VERSION_")) {
 			currentProcessedVersion = match[1];
 			glVersionList.push(currentProcessedVersion);
 		}
+		cConstants.push({"name":match[1], "value":match[2], "glVersion": currentProcessedVersion});
 	} else {
 		match = methodRegExp.exec(line);
 		if (match) {
@@ -218,22 +218,47 @@ DUK_EXTERNAL_DECL void dukwebgl_bind(duk_context *ctx);
     duk_put_prop_string((ctx), -2, #webgl_constant)
 
 DUK_LOCAL void dukwebgl_bind_constants(duk_context *ctx) {
-    /*  
-     *  If constant is not defined in included OpenGL C headers, it will not be exported to JS object
-     *  In practice many WebGL only constants, like UNPACK_FLIP_Y_WEBGL, are never exported
-     */
-
 	`;
 
+	// constants NOT defined in OpenGL C API headers
 	constants.forEach(c => {
+		var cConstantName = `GL_${c.name}`;
+		if ('cConstant' in c) {
+			return;
+		}
+
 		if (c.name in customWebGlConstantImplementations && customWebGlConstantImplementations[c.name].skip === true) {
 			cResult += `/* NOT IMPLEMENTED: ${c.name} */\n`;
 			return;
 		}
 
-		cResult += `#ifdef GL_${c.name}\n`;
+		cResult += `#ifdef ${cConstantName}\n`;
 		cResult += `    dukwebgl_push_constant_property(ctx, ${c.name});\n`;
 		cResult += `#endif\n`;
+	});
+
+	// constants defined in OpenGL C API headers
+	glVersionList.forEach(glVersion => {
+		cResult += `\n#ifdef ${glVersion}\n`
+		constants.forEach(c => {
+			var cConstantName = `GL_${c.name}`;
+			if (!c.cConstant) {
+				return;
+			}
+			if (glVersion !== c.cConstant.glVersion) {
+				return;
+			}
+
+			if (c.name in customWebGlConstantImplementations && customWebGlConstantImplementations[c.name].skip === true) {
+				cResult += `/* NOT IMPLEMENTED: ${c.name} */\n`;
+				return;
+			}
+
+			cResult += `#ifdef ${cConstantName}\n`;
+			cResult += `    dukwebgl_push_constant_property(ctx, ${c.name});\n`;
+			cResult += `#endif\n`;
+		});
+		cResult += `#endif /* ${glVersion} */ \n`
 	});
 
 	cResult += `
