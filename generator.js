@@ -53,6 +53,11 @@ var glTypeDukTypeParameterFunctionMap = {
 	"WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_int(ctx, ${index})` },
 	"GLintptr": function(index) { return `(NULL + duk_get_int(ctx, ${index}))` },
 	"GLboolean": function(index) { return `(duk_get_boolean(ctx, ${index}) == 1 ? GL_TRUE : GL_FALSE)` },
+	"Float32Array": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
+	"Int32Array": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
+	"ArrayBufferView": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
+	"ArrayBuffer": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
+	"BufferSource": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
 };
 
 var glTypeDukTypeReturnFunctionMap = {
@@ -82,6 +87,10 @@ var customWebGlBindingImplementations = {
 	"createTexture": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
 	"deleteTexture": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
 	"bufferData": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+	"texImage2D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+	"readPixels": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+	"texSubImage2D": {"argumentCount": 9, "glVersion": "GL_VERSION_2_0"},
+	"texImage3D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
 };
 
 var customWebGlConstantImplementations = {
@@ -530,6 +539,123 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_bufferData(duk_context *ctx) {
     glBufferData(target, (GLsizeiptr)(NULL + data_size), (const GLvoid *)data, usage);
     /* GL 4.5: glNamedBufferData(target, (GLsizeiptr)(NULL + data_size), (const GLvoid *)data, usage); */
 
+    return 0;
+}
+
+/* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D */
+
+DUK_LOCAL void * dukwebgl_get_pixels(duk_context *ctx, duk_idx_t idx) {
+    void * pixels = NULL;
+    if (duk_is_buffer_data(ctx, idx)) {
+        /* ArrayBufferView / BufferSource */
+        pixels = duk_get_buffer_data(ctx, idx, NULL);
+    } else if (duk_is_object(ctx, idx)) {
+        /* ref. https://developer.mozilla.org/en-US/docs/Web/API/ImageData */
+        if (duk_has_prop_string(ctx, idx, "data")) {
+            duk_get_prop_string(ctx, idx, "data");
+            if (duk_is_buffer_data(ctx, -1)) {
+                pixels = duk_get_buffer_data(ctx, -1, NULL);
+                duk_pop(ctx);
+            } else {
+                /* unrecognized object.data variable type */
+		return NULL;
+            }
+        } else {
+            /* unrecognized object type */
+	    return NULL;
+        }
+    } else {
+        /* FIXME: TBD GLintptr offset */
+        /* unrecognized argument type */
+	return NULL;
+    }
+
+    return pixels;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage2D(duk_context *ctx) {
+    int argc = duk_get_top(ctx);
+
+    /* FIXME: partial implementation. figure out HTMLImageElement, HTMLCanvasElement, HTMLVideoElement, ImageBitmap */
+    GLenum target = (GLenum)duk_get_uint(ctx, 0);
+    GLint level = (GLint)duk_get_int(ctx, 1);
+    GLint internalformat = (GLint)duk_get_int(ctx, 2);
+    GLsizei width = (GLsizei)duk_get_int(ctx, 3);
+    GLsizei height = (GLsizei)duk_get_int(ctx, 4);
+    GLint border = (GLint)duk_get_int(ctx, 5);
+    GLenum format = (GLenum)duk_get_uint(ctx, 6);
+    GLenum type = (GLenum)duk_get_uint(ctx, 7);
+
+    void * pixels = dukwebgl_get_pixels(ctx, 8);
+
+    GLuint offset = 0;
+    if (argc > 8) {
+        offset = (GLuint)duk_get_uint(ctx, 9);
+    }
+
+    glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels + offset);
+
+    return 0;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_readPixels(duk_context *ctx) {
+    int argc = duk_get_top(ctx);
+
+    GLint x = (GLint)duk_get_int(ctx, 0);
+    GLint y = (GLint)duk_get_int(ctx, 1);
+    GLsizei width = (GLsizei)duk_get_int(ctx, 2);
+    GLsizei height = (GLsizei)duk_get_int(ctx, 3);
+    GLenum format = (GLenum)duk_get_uint(ctx, 4);
+    GLenum type = (GLenum)duk_get_uint(ctx, 5);
+    void * pixels = (void *)duk_get_buffer_data(ctx, 6, NULL);
+
+    GLuint dstoffset = 0;
+    if (argc > 7) {
+        dstoffset = (GLuint)duk_get_uint(ctx, 8);
+    }
+
+    glReadPixels(x,y,width,height,format,type,pixels + dstoffset);
+
+    return 0;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texSubImage2D(duk_context *ctx) {
+    GLenum target = (GLenum)duk_get_uint(ctx, 0);
+    GLint level = (GLint)duk_get_int(ctx, 1);
+    GLint xoffset = (GLint)duk_get_int(ctx, 2);
+    GLint yoffset = (GLint)duk_get_int(ctx, 3);
+    GLsizei width = (GLsizei)duk_get_int(ctx, 4);
+    GLsizei height = (GLsizei)duk_get_int(ctx, 5);
+    GLenum format = (GLenum)duk_get_uint(ctx, 6);
+    GLenum type = (GLenum)duk_get_uint(ctx, 7);
+
+    const void * pixels = dukwebgl_get_pixels(ctx, 8);
+
+    glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
+
+    return 0;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage3D(duk_context *ctx) {
+    int argc = duk_get_top(ctx);
+
+    GLenum target = (GLenum)duk_get_uint(ctx, 0);
+    GLint level = (GLint)duk_get_int(ctx, 1);
+    GLint internalformat = (GLint)duk_get_int(ctx, 2);
+    GLsizei width = (GLsizei)duk_get_int(ctx, 3);
+    GLsizei height = (GLsizei)duk_get_int(ctx, 4);
+    GLsizei depth = (GLsizei)duk_get_int(ctx, 5);
+    GLint border = (GLint)duk_get_int(ctx, 6);
+    GLenum format = (GLenum)duk_get_uint(ctx, 7);
+    GLenum type = (GLenum)duk_get_uint(ctx, 8);
+    const void * pixels = dukwebgl_get_pixels(ctx, 9);
+
+    GLuint offset = 0;
+    if (argc > 9) {
+        offset = (GLuint)duk_get_uint(ctx, 10);
+    }
+
+    glTexImage3D(target,level,internalformat,width,height,depth,border,format,type,pixels + offset);
     return 0;
 }
 
