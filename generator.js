@@ -78,7 +78,10 @@ var customWebGlBindingImplementations = {
 	"getShaderParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
 	"getShaderInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
 	"createBuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
+	"deleteBuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
 	"createTexture": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
+	"deleteTexture": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
+	"bufferData": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
 };
 
 var customWebGlConstantImplementations = {
@@ -458,20 +461,76 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createBuffer(duk_context *ctx) {
     GLuint buffers[1];
 
     glGenBuffers(1, buffers);
+    /* GL 4.5: void glCreateBuffers(GLsizei n, GLuint *buffers); */
 
     dukwebgl_create_object_uint(ctx, buffers[0]);
 
     return 1;
 }
 
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteBuffer(duk_context *ctx) {
+    GLuint buffer = dukwebgl_get_object_id_uint(ctx, 0);
+    GLuint buffers[1] = { buffer };
+
+    glDeleteBuffers(1, buffers);
+
+    return 0;
+}
+
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createTexture(duk_context *ctx) {
     GLuint textures[1];
 
     glGenTextures(1, textures);
+    /* GL 4.5: void glCreateTextures(GLenum target, GLsizei n, GLuint *textures); */
 
     dukwebgl_create_object_uint(ctx, textures[0]);
 
     return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteTexture(duk_context *ctx) {
+    GLuint texture = dukwebgl_get_object_id_uint(ctx, 0);
+    GLuint textures[1] = { texture };
+
+    glDeleteTextures(1, textures);
+
+    return 0;
+}
+
+/* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bufferData */
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_bufferData(duk_context *ctx) {
+    int argc = duk_get_top(ctx);
+
+    GLenum target = (GLenum)duk_get_uint(ctx, 0);
+
+    duk_size_t data_size = 0;
+    void *data = NULL;
+    if (duk_is_buffer_data(ctx, 1)) {
+        data = duk_get_buffer_data(ctx, 1, &data_size);
+    } else {
+        /* WebGL 1 alternative */
+        data_size = (duk_size_t)duk_get_uint(ctx, 1);
+    }
+
+    GLenum usage = (GLenum)duk_get_uint(ctx, 2);
+
+    GLuint src_offset = 0;
+
+    if (argc > 3) {
+        /* WebGL 2 mandatory */
+        src_offset = (GLuint)duk_get_uint(ctx, 3);
+        data_size -= src_offset;
+
+        if (argc > 4) {
+            /* WebGL 2 optional */
+            data_size = (GLuint)duk_get_uint(ctx, 4);
+        }
+    }
+
+    glBufferData(target, (GLsizeiptr)(NULL + data_size), (const GLvoid *)data, usage);
+    /* GL 4.5: glNamedBufferData(target, (GLsizeiptr)(NULL + data_size), (const GLvoid *)data, usage); */
+
+    return 0;
 }
 
 #endif /* GL_VERSION_2_0 */
