@@ -619,8 +619,18 @@ methods.forEach(m => {
 DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
     duk_push_object(ctx);
 
-    if (duk_is_constructor_call(ctx)) {
-        dukwebgl_bind_constants(ctx);\n`;
+    if (!duk_is_constructor_call(ctx)) {
+        return DUK_RET_TYPE_ERROR;
+    }
+
+    return 0;
+}
+
+void dukwebgl_bind(duk_context *ctx) {
+    duk_push_c_function(ctx, dukwebgl_WebGL2RenderingContext, 0);
+    duk_push_object(ctx);
+    dukwebgl_bind_constants(ctx);\n`;
+
 	glVersionList.forEach(glVersion => {
 		cResult += `\n#ifdef ${glVersion}\n`
 		Object.entries(customWebGlBindingImplementations).forEach(entry => {
@@ -648,20 +658,12 @@ DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
 		});
 		cResult += `#endif /* ${glVersion} */\n`
 	});
-	
-	cResult += `
-	/* Function binding coverage = ${mappedMethodCount}/${methods.length} = ${mappedMethodCount/methods.length*100.0} % */
-    }
 
-    return 1;
-}
+    cResult += `
+    /* Function binding coverage = ${mappedMethodCount}/${methods.length} = ${mappedMethodCount/methods.length*100.0} % */
 
-DUK_LOCAL void dukwebgl_bind_methods(duk_context *ctx) {
-    dukwebgl_bind_function(ctx, WebGL2RenderingContext, WebGL2RenderingContext, 0);
-} /* dukwebgl_bind_methods */
-
-void dukwebgl_bind(duk_context *ctx) {
-    dukwebgl_bind_methods(ctx);
+    duk_put_prop_string(ctx, -2, "prototype");
+    duk_put_global_string(ctx, "WebGL2RenderingContext");
 } /* dukwebgl_bind */
 
 #endif /* DUKWEBGL_IMPLEMENTATION */

@@ -29,12 +29,8 @@ Zlib (similar to MIT)
 #include "dukwebgl.h"
 
 ...
-    duk_push_global_object(ctx);
-
     /* duktape-webgl bindings will be added to the global object */
     dukwebgl_bind(ctx);
-
-    duk_pop(ctx);
 ...
 ```
 

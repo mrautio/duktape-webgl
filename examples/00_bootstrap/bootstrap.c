@@ -131,6 +131,9 @@ int main (int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
+	/* Create duktape-webgl bindings to current Duktape context */
+	dukwebgl_bind(ctx);
+
 	duk_push_global_object(ctx);
 
 	/* bind c_js_exit function as "bootstrapExit" in Duktape context to global object */
@@ -142,9 +145,6 @@ int main (int argc, char **argv) {
 	duk_put_prop_string(ctx, -2, "BOOTSTRAP_WINDOW_WIDTH");
 	duk_push_uint(ctx, BOOTSTRAP_WINDOW_HEIGHT);
 	duk_put_prop_string(ctx, -2, "BOOTSTRAP_WINDOW_HEIGHT");
-
-	/* Create duktape-webgl bindings to current Duktape context */
-	dukwebgl_bind(ctx);
 
 	duk_pop(ctx);
 
