@@ -18,6 +18,11 @@ function init() {
         // Duktape
         gl = new WebGL2RenderingContext();
         gl._GLSL_VERSION = '320 core';
+	// So the version is a wild guess.
+	// You could very well end up with shader compilation errors like:
+	//   "GLSL 3.20 is not supported. Supported versions are: 1.10, 1.20, 1.30, 1.00 ES, and 3.00 ES"
+	// Note that you can try to change the version accordingly, however might require changes in GLSL shader sources (vertexShaderSource and fragmentShaderSource)!
+        // example: gl._GLSL_VERSION = '300 es';
     } else if (typeof document !== 'undefined') {
         // HTML5
         var canvas = document.getElementById("screen");
@@ -87,6 +92,7 @@ function init() {
 
     vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+
     gl.bufferData(gl.ARRAY_BUFFER, vboData, gl.STATIC_DRAW, 0);
 
     gl.enableVertexAttribArray(0);
@@ -109,8 +115,16 @@ function draw() {
 function cleanup() {
     // do the cleanup
 
-    gl.deleteShader(vertexShader);
-    gl.deleteShader(fragmentShader);
-    gl.deleteProgram(program);
-    gl.deleteBuffer(vbo);
+    if (vertexShader) {
+        gl.deleteShader(vertexShader);
+    }
+    if (fragmentShader) {
+        gl.deleteShader(fragmentShader);
+    }
+    if (program) {
+        gl.deleteProgram(program);
+    }
+    if (vbo) {
+        gl.deleteBuffer(vbo);
+    }
 }
