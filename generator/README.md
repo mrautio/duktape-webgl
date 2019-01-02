@@ -8,6 +8,6 @@
 * If you want to generate content then by all means. This is done using Docker:
 
 ```
-docker build -t duktape-webgl-generator . && docker run -t --read-only duktape-webgl-generator > dukwebgl.h
+docker build -t duktape-webgl-generator -f Dockerfile .. && docker run -t --read-only duktape-webgl-generator > dukwebgl.h
 ```
 
