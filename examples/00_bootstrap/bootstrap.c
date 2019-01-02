@@ -91,6 +91,29 @@ static duk_ret_t c_js_exit(duk_context *ctx) {
 	return 0;
 }
 
+static void save_screenshot(unsigned long frame, int width, int height) {    
+	const int channels = 4;
+    const int pixels = width * height * channels;
+    char file[64];
+    snprintf(file, 64, "tmpscreenshot_%06lu.rgb", frame);
+
+    unsigned char data[pixels];
+    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    FILE *of = fopen(file, "wb");
+    if (of == NULL) {
+    	fprintf(stderr, "Could not open file '%s' for writing!\n", file);
+    	exit(EXIT_FAILURE);
+    }
+    size_t written = fwrite(data, sizeof(char), pixels, of);
+    fclose(of);
+
+    if (written != pixels) {
+    	fprintf(stderr, "Could not write to file '%s'! %lu <=> %d\n", file, written, pixels);
+    	exit(EXIT_FAILURE);
+    }
+}
+
 /* Helper function to check that no OpenGL errors occur */
 static duk_bool_t is_gl_error() {
 	GLenum error_code = glGetError();
@@ -268,6 +291,7 @@ int main (int argc, char **argv) {
 	eval_js(ctx, "if (typeof init === 'function') { init(); } ");
 
 	int loop = 1;
+	int screenshot = 0;
 
 	const char *DUKWEBGL_BOOTSTRAP_ONE_DRAW = SDL_getenv("DUKWEBGL_BOOTSTRAP_ONE_DRAW");
 	if (DUKWEBGL_BOOTSTRAP_ONE_DRAW && !strcmp(DUKWEBGL_BOOTSTRAP_ONE_DRAW, "TRUE")) {
@@ -275,6 +299,13 @@ int main (int argc, char **argv) {
 		loop = 0;
 	}
 
+	const char *DUKWEBGL_BOOTSTRAP_SCREENSHOT = SDL_getenv("DUKWEBGL_BOOTSTRAP_SCREENSHOT");
+	if (DUKWEBGL_BOOTSTRAP_SCREENSHOT && !strcmp(DUKWEBGL_BOOTSTRAP_SCREENSHOT, "TRUE")) {
+		/* Attempt to save a screenshot per every draw round */
+		screenshot = 1;
+	}
+
+	unsigned long frame = 0;
 	do {
 		/* attempt to call draw() function in JavaScript */
 		eval_js(ctx, "if (typeof draw === 'function') { draw(); } ");
@@ -286,6 +317,10 @@ int main (int argc, char **argv) {
 
 		/* draw / swap window buffer */
 		SDL_GL_SwapWindow(window);
+
+		if (screenshot) {
+			save_screenshot(frame, BOOTSTRAP_WINDOW_WIDTH, BOOTSTRAP_WINDOW_HEIGHT);
+		}
 		
 		/* Check for user exit */
 		SDL_Event event;
@@ -306,7 +341,7 @@ int main (int argc, char **argv) {
 
 		/* sleep 1 ms */
 		SDL_Delay(1);
-
+		frame++;
 	} while(loop);
 
 	exit(EXIT_SUCCESS);
