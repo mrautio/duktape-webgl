@@ -10,9 +10,10 @@
 
 ## License
 
-Zlib (similar to MIT)
+[Zlib](https://github.com/mrautio/duktape-webgl/blob/master/LICENSE)
 
 ## Setup
+
 * Include dukwebgl.h to your Duktape & OpenGL project.
 
 ### C initialization example
@@ -47,20 +48,10 @@ var gl = new WebGL2RenderingContext();
 * C API should be minimal, yet allowing some flexibility for power-users
 * Comply to intersection of OpenGL core C API headers and WebGL 1.x - 2.x APIs
   * Only support WebGL constants defined in the C API
-  * Only support WebGL functions, that can be "straightforward" mapped to C API call
   * Users should have possibility to restrict API imports based on OpenGL core version, i.e. via define/undef 
 * Performance over validity
   * Does not validate input
     * Duktape context is assumed to be valid
     * Variables passed from JS are assumed to be valid for intended OpenGL API calls
   * Will attempt to pass calls to underlying OpenGL C API functions with low overhead.
-
-## Generating duktape-webgl header
-
-* As an end user, you should just download latest pre-generated header file. Generator is meant for development.
-* If you want to generate content then by all means. This is done using Docker:
-
-```
-docker build -t duktape-webgl-generator . && docker run -t --read-only duktape-webgl-generator > dukwebgl.h
-```
 

@@ -7,7 +7,7 @@ jobs:
     - stage: test
       script:
       # generate
-      - docker build -t duktape-webgl-generator .
+      - docker build -t duktape-webgl-generator -f generator/Dockerfile .
       - docker run -t --read-only duktape-webgl-generator > examples/00_bootstrap/dukwebgl.h
       # compile
       - docker build -t duktape-webgl-examples examples
