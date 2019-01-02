@@ -11,6 +11,7 @@ RUN wget ${WEBGL2_IDL_URL} -O webgl2.idl
 RUN wget ${WEBGL1_IDL_URL} -O webgl1.idl
 RUN wget ${OPENGL_H_URL} -O glcorearb.h
 
+COPY LICENSE /tmp/
 COPY package*.json /tmp/
 COPY generator.js /tmp/
 
