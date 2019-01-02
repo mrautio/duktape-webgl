@@ -91,6 +91,9 @@ var customWebGlBindingImplementations = {
 	"readPixels": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
 	"texSubImage2D": {"argumentCount": 9, "glVersion": "GL_VERSION_2_0"},
 	"texImage3D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+	"uniformMatrix2fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
+	"uniformMatrix3fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
+	"uniformMatrix4fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
 };
 
 var customWebGlConstantImplementations = {
@@ -313,6 +316,39 @@ DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) 
 }
 
 #ifdef GL_VERSION_2_0
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix2fv(duk_context *ctx) {
+    GLuint location = dukwebgl_get_object_id_uint(ctx, 0);
+    GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE);
+    duk_size_t count = 0;
+    const GLfloat *value = duk_get_buffer_data(ctx, 2, &count);
+
+    glUniformMatrix2fv(location, (GLsizei)count, transpose, value);
+
+    return 0;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix3fv(duk_context *ctx) {
+    GLuint location = dukwebgl_get_object_id_uint(ctx, 0);
+    GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE);
+    duk_size_t count = 0;
+    const GLfloat *value = duk_get_buffer_data(ctx, 2, &count);
+
+    glUniformMatrix3fv(location, (GLsizei)count, transpose, value);
+
+    return 0;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix4fv(duk_context *ctx) {
+    GLuint location = dukwebgl_get_object_id_uint(ctx, 0);
+    GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE);
+    duk_size_t count = 0;
+    const GLfloat *value = duk_get_buffer_data(ctx, 2, &count);
+
+    glUniformMatrix4fv(location, (GLsizei)count, transpose, value);
+
+    return 0;
+}
 
 /* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getProgramParameter */
 DUK_LOCAL void dukwebgl_push_boolean_program_parameter(duk_context *ctx, GLuint program, GLenum pname) {
@@ -576,24 +612,59 @@ DUK_LOCAL void * dukwebgl_get_pixels(duk_context *ctx, duk_idx_t idx) {
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage2D(duk_context *ctx) {
     int argc = duk_get_top(ctx);
 
-    /* FIXME: partial implementation. figure out HTMLImageElement, HTMLCanvasElement, HTMLVideoElement, ImageBitmap */
     GLenum target = (GLenum)duk_get_uint(ctx, 0);
     GLint level = (GLint)duk_get_int(ctx, 1);
     GLint internalformat = (GLint)duk_get_int(ctx, 2);
-    GLsizei width = (GLsizei)duk_get_int(ctx, 3);
-    GLsizei height = (GLsizei)duk_get_int(ctx, 4);
-    GLint border = (GLint)duk_get_int(ctx, 5);
-    GLenum format = (GLenum)duk_get_uint(ctx, 6);
-    GLenum type = (GLenum)duk_get_uint(ctx, 7);
+    GLsizei width = 0;
+    GLsizei height = 0;
+    GLint border = 0;
+    GLenum format = 0;
+    GLenum type = 0;
+    void *pixels = NULL;
 
-    void * pixels = dukwebgl_get_pixels(ctx, 8);
+    /* FIXME: partial implementation. figure out HTMLImageElement, HTMLCanvasElement, HTMLVideoElement, ImageBitmap */
+    if (argc == 6) {
+        format = (GLenum)duk_get_uint(ctx, 3);
+        type = (GLenum)duk_get_uint(ctx, 4);
 
-    GLuint offset = 0;
-    if (argc > 8) {
-        offset = (GLuint)duk_get_uint(ctx, 9);
+        if (duk_is_object(ctx, 6)) {
+            /* ref. https://developer.mozilla.org/en-US/docs/Web/API/ImageData */
+            if (duk_has_prop_string(ctx, 6, "width")) {
+                duk_get_prop_string(ctx, 6, "width");
+                width = (GLsizei)duk_get_int(ctx, -1);
+                duk_pop(ctx);
+            }
+            if (duk_has_prop_string(ctx, 6, "height")) {
+                duk_get_prop_string(ctx, 6, "height");
+                height = (GLsizei)duk_get_int(ctx, -1);
+                duk_pop(ctx);
+            }
+            if (duk_has_prop_string(ctx, 6, "data")) {
+                duk_get_prop_string(ctx, 6, "data");
+                if (duk_is_buffer_data(ctx, -1)) {
+                    pixels = duk_get_buffer_data(ctx, -1, NULL);
+                    duk_pop(ctx);
+                }
+            }
+        }
+
+        pixels = dukwebgl_get_pixels(ctx, 8);
+    } else {
+        width = (GLsizei)duk_get_int(ctx, 3);
+        height = (GLsizei)duk_get_int(ctx, 4);
+        border = (GLint)duk_get_int(ctx, 5);
+        format = (GLenum)duk_get_uint(ctx, 6);
+        type = (GLenum)duk_get_uint(ctx, 7);
+
+        pixels = dukwebgl_get_pixels(ctx, 8);
+
+        if (argc > 8) {
+            GLuint offset = (GLuint)duk_get_uint(ctx, 9);
+	    pixels = pixels + offset;
+        }
     }
 
-    glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels + offset);
+    glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
 
     return 0;
 }
