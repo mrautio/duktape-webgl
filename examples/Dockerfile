@@ -7,6 +7,9 @@ WORKDIR /tmp
 
 COPY docker_entrypoint.sh .
 
+ENV DUKWEBGL_BOOTSTRAP_ONE_DRAW=TRUE
+ENV DUKWEBGL_BOOTSTRAP_GLSL_VERSION="300 es"
+
 ADD 00_bootstrap 00_bootstrap
 ADD 01_grey_screen 01_grey_screen
 ADD 02_hello_triangle 02_hello_triangle

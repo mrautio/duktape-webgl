@@ -91,6 +91,64 @@ static duk_ret_t c_js_exit(duk_context *ctx) {
 	return 0;
 }
 
+/* Helper function to check that no OpenGL errors occur */
+static duk_bool_t is_gl_error() {
+	GLenum error_code = glGetError();
+	if (error_code != GL_NO_ERROR) {
+		const char *error_string;
+
+		switch(error_code) {
+#ifdef GL_INVALID_ENUM
+			case GL_INVALID_ENUM:
+				error_string = "GL_INVALID_ENUM";
+				break;
+#endif
+#ifdef GL_INVALID_VALUE
+			case GL_INVALID_VALUE:
+				error_string = "GL_INVALID_VALUE";
+				break;
+#endif
+#ifdef GL_INVALID_OPERATION
+			case GL_INVALID_OPERATION:
+				error_string = "GL_INVALID_OPERATION";
+				break;
+#endif
+#ifdef GL_INVALID_FRAMEBUFFER_OPERATION
+			case GL_INVALID_FRAMEBUFFER_OPERATION:
+				error_string = "GL_INVALID_FRAMEBUFFER_OPERATION";
+				break;
+#endif
+#ifdef GL_OUT_OF_MEMORY
+			case GL_OUT_OF_MEMORY:
+				error_string = "GL_OUT_OF_MEMORY";
+				break;
+#endif
+#ifdef GL_STACK_UNDERFLOW
+			case GL_STACK_UNDERFLOW:
+				error_string = "GL_STACK_UNDERFLOW";
+				break;
+#endif
+#ifdef GL_STACK_OVERFLOW
+			case GL_STACK_OVERFLOW:
+				error_string = "GL_STACK_OVERFLOW";
+				break;
+#endif
+			default:
+				error_string = "N/A";
+				break;
+		}
+
+		fprintf(stderr, "OpenGL error occurred: %s (0x%X). OpenGL: %s, GLSL: %s\n",
+				error_string, error_code,
+				glGetString(GL_VERSION),
+				glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+		return 1;
+	}
+
+	return 0;
+}
+
 int main (int argc, char **argv) {
 	atexit(cleanup);
 
@@ -125,6 +183,13 @@ int main (int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
+	const char *glsl_use_version = "320 core";
+	const char *DUKWEBGL_BOOTSTRAP_GLSL_VERSION = SDL_getenv("DUKWEBGL_BOOTSTRAP_GLSL_VERSION");
+	if (DUKWEBGL_BOOTSTRAP_GLSL_VERSION) {
+		/* Override GLSL version */
+		glsl_use_version = DUKWEBGL_BOOTSTRAP_GLSL_VERSION;
+	}
+
 	ctx = duk_create_heap_default();
 	if (!ctx) {
 		fprintf(stderr, "Failed to create Duktape heap\n");
@@ -145,6 +210,10 @@ int main (int argc, char **argv) {
 	duk_put_prop_string(ctx, -2, "BOOTSTRAP_WINDOW_WIDTH");
 	duk_push_uint(ctx, BOOTSTRAP_WINDOW_HEIGHT);
 	duk_put_prop_string(ctx, -2, "BOOTSTRAP_WINDOW_HEIGHT");
+
+	/* GLSL version hint */
+	duk_push_string(ctx, glsl_use_version);
+	duk_put_prop_string(ctx, -2, "BOOTSTRAP_GLSL_VERSION");
 
 	duk_pop(ctx);
 
@@ -182,6 +251,8 @@ int main (int argc, char **argv) {
 		/* evaluate file data in Duktape */
 		eval_js(ctx, data);
 
+		fprintf(stdout, "Loaded file %s\n", file);
+
 		/* cleanup file iteration */
 		fclose(f);
 		f = NULL;
@@ -196,9 +267,22 @@ int main (int argc, char **argv) {
 
 	eval_js(ctx, "if (typeof init === 'function') { init(); } ");
 
-	while(1) {
+	int loop = 1;
+
+	const char *DUKWEBGL_BOOTSTRAP_ONE_DRAW = SDL_getenv("DUKWEBGL_BOOTSTRAP_ONE_DRAW");
+	if (DUKWEBGL_BOOTSTRAP_ONE_DRAW && !strcmp(DUKWEBGL_BOOTSTRAP_ONE_DRAW, "TRUE")) {
+		/* Do not loop, draw only once. Used for unit testing */
+		loop = 0;
+	}
+
+	do {
 		/* attempt to call draw() function in JavaScript */
 		eval_js(ctx, "if (typeof draw === 'function') { draw(); } ");
+
+		/* Check for OpenGL errors */
+		if (is_gl_error()) {
+			exit(EXIT_FAILURE);
+		}
 
 		/* draw / swap window buffer */
 		SDL_GL_SwapWindow(window);
@@ -219,10 +303,11 @@ int main (int argc, char **argv) {
 				}
 			}
 		}
-		
+
 		/* sleep 1 ms */
 		SDL_Delay(1);
-	}
+
+	} while(loop);
 
 	exit(EXIT_SUCCESS);
 }

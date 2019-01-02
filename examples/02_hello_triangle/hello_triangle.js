@@ -12,22 +12,22 @@ var program = undefined;
 var vbo = undefined;
 
 function init() {
-    // cross-platform (browser vs. Duktape) initialize WebGL 2
     // will define custom variable _GLSL_VERSION to make GLSL compatible between OpenGL core and OpenGL ES
+    var glsl_version = '300 es';
+    if (typeof BOOTSTRAP_GLSL_VERSION === 'string') {
+	    // If you end up with errors like: "GLSL 3.20 is not supported. Supported versions are: 1.10, 1.20, 1.30, 1.00 ES, and 3.00 ES"
+	    // Then you should customize BOOTSTRAP_GLSL_VERSION to fit your need, or customize the shader code
+	    glsl_version = BOOTSTRAP_GLSL_VERSION;
+    }
+
+    // cross-platform (browser vs. Duktape) initialize WebGL 2
     if (typeof Duktape !== 'undefined') {
         // Duktape
         gl = new WebGL2RenderingContext();
-        gl._GLSL_VERSION = '320 core';
-	// So the version is a wild guess.
-	// You could very well end up with shader compilation errors like:
-	//   "GLSL 3.20 is not supported. Supported versions are: 1.10, 1.20, 1.30, 1.00 ES, and 3.00 ES"
-	// Note that you can try to change the version accordingly, however might require changes in GLSL shader sources (vertexShaderSource and fragmentShaderSource)!
-        // example: gl._GLSL_VERSION = '300 es';
     } else if (typeof document !== 'undefined') {
         // HTML5
         var canvas = document.getElementById("screen");
         gl = canvas.getContext("webgl2");
-        gl._GLSL_VERSION = '300 es';
     }
 
     if (!gl || !(gl instanceof WebGL2RenderingContext)) {
@@ -37,7 +37,7 @@ function init() {
     // compile vertex shader
 
     var vertexShaderSource = "";
-    vertexShaderSource += "#version " + gl._GLSL_VERSION + "\n";
+    vertexShaderSource += "#version " + glsl_version + "\n";
     vertexShaderSource += "#ifdef GL_ES\n";
     vertexShaderSource += "    precision mediump float;\n";
     vertexShaderSource += "#endif\n";
@@ -57,7 +57,7 @@ function init() {
     // compile fragment shader
 
     var fragmentShaderSource = "";
-    fragmentShaderSource += "#version " + gl._GLSL_VERSION + "\n";
+    fragmentShaderSource += "#version " + glsl_version + "\n";
     fragmentShaderSource += "#ifdef GL_ES\n";
     fragmentShaderSource += "    precision mediump float;\n";
     fragmentShaderSource += "#endif\n";
