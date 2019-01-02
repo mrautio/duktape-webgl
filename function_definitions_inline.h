@@ -255,7 +255,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_bufferData(duk_context *ctx) {
         }
     }
 
-    glBufferData(target, (GLsizeiptr)(NULL + data_size), (const GLvoid *)data, usage);
+    glBufferData(target, (GLsizeiptr)((char*)NULL + data_size), (const GLvoid *)data, usage);
     /* GL 4.5: glNamedBufferData(target, (GLsizeiptr)(NULL + data_size), (const GLvoid *)data, usage); */
 
     return 0;
@@ -343,7 +343,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage2D(duk_context *ctx) {
 
         if (argc > 8) {
             GLuint offset = (GLuint)duk_get_uint(ctx, 9);
-        pixels = pixels + offset;
+            pixels = (char*)pixels + offset;
         }
     }
 
@@ -366,9 +366,10 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_readPixels(duk_context *ctx) {
     GLuint dstoffset = 0;
     if (argc > 7) {
         dstoffset = (GLuint)duk_get_uint(ctx, 8);
+	pixels = (char*)pixels + dstoffset;
     }
 
-    glReadPixels(x,y,width,height,format,type,pixels + dstoffset);
+    glReadPixels(x,y,width,height,format,type,pixels);
 
     return 0;
 }
@@ -407,9 +408,10 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage3D(duk_context *ctx) {
     GLuint offset = 0;
     if (argc > 9) {
         offset = (GLuint)duk_get_uint(ctx, 10);
+	pixels = (char*)pixels + offset;
     }
 
-    glTexImage3D(target,level,internalformat,width,height,depth,border,format,type,pixels + offset);
+    glTexImage3D(target,level,internalformat,width,height,depth,border,format,type,pixels);
     return 0;
 }
 

@@ -51,7 +51,7 @@ var glTypeDukTypeParameterFunctionMap = {
 	"WebGLSampler": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
 	"WebGLQuery": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
 	"WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_int(ctx, ${index})` },
-	"GLintptr": function(index) { return `(NULL + duk_get_int(ctx, ${index}))` },
+	"GLintptr": function(index) { return `((char*)NULL + duk_get_int(ctx, ${index}))` },
 	"GLboolean": function(index) { return `(duk_get_boolean(ctx, ${index}) == 1 ? GL_TRUE : GL_FALSE)` },
 	"Float32Array": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
 	"Int32Array": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
