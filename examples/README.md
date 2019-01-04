@@ -5,6 +5,8 @@
 
 ## Docker build and run examples
 
+* Note that dukwebgl.h header file is not available by default so you need to place the header to 00\_bootstrap directory
+
 ```
 docker build -t duktape-webgl-examples . && docker run --rm -t duktape-webgl-examples
 ```
