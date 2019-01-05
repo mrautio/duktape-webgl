@@ -1,3 +1,51 @@
+DUK_LOCAL void dukwebgl_create_object_uint(duk_context *ctx, GLuint id) {
+    if (id == 0) {
+        duk_push_null(ctx);
+        return;
+    }
+
+    duk_idx_t obj = duk_push_object(ctx);
+    duk_push_uint(ctx, id);
+    duk_put_prop_string(ctx, obj, "_id");
+}
+
+DUK_LOCAL GLuint dukwebgl_get_object_id_uint(duk_context *ctx, duk_idx_t obj_idx) {
+    GLuint ret = 0;
+
+    // everything else than object assumed null
+    if (duk_is_object(ctx, obj_idx)) {
+        duk_get_prop_string(ctx, obj_idx, "_id");
+        ret = (GLuint)duk_to_uint(ctx, -1);
+        duk_pop(ctx);
+    }
+
+    return ret;
+}
+
+DUK_LOCAL void dukwebgl_create_object_int(duk_context *ctx, GLint id) {
+    if (id == 0) {
+        duk_push_null(ctx);
+        return;
+    }
+
+    duk_idx_t obj = duk_push_object(ctx);
+    duk_push_int(ctx, id);
+    duk_put_prop_string(ctx, obj, "_id");
+}
+
+DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) {
+    GLint ret = 0;
+
+    // everything else than object assumed null
+    if (duk_is_object(ctx, obj_idx)) {
+        duk_get_prop_string(ctx, obj_idx, "_id");
+        ret = (GLint)duk_to_int(ctx, -1);
+        duk_pop(ctx);
+    }
+
+    return ret;
+}
+
 #ifdef GL_VERSION_2_0
 
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix2fv(duk_context *ctx) {

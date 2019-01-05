@@ -269,41 +269,6 @@ DUK_LOCAL void dukwebgl_bind_constants(duk_context *ctx) {
 
 	cResult += `
 } /* dukwebgl_bind_constants */
-
-DUK_LOCAL duk_idx_t dukwebgl_create_object_uint(duk_context *ctx, GLuint id) {
-    duk_idx_t obj = duk_push_object(ctx);
-    
-    duk_push_uint(ctx, id);
-    duk_put_prop_string(ctx, obj, "_id");
-
-    return obj;
-}
-
-DUK_LOCAL GLuint dukwebgl_get_object_id_uint(duk_context *ctx, duk_idx_t obj_idx) {
-    duk_get_prop_string(ctx, obj_idx, "_id");
-    GLuint ret = (GLuint)duk_to_uint(ctx, -1);
-    duk_pop(ctx);
-
-    return ret;
-}
-
-DUK_LOCAL duk_idx_t dukwebgl_create_object_int(duk_context *ctx, GLint id) {
-    duk_idx_t obj = duk_push_object(ctx);
-    
-    duk_push_int(ctx, id);
-    duk_put_prop_string(ctx, obj, "_id");
-
-    return obj;
-}
-
-DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) {
-    duk_get_prop_string(ctx, obj_idx, "_id");
-    GLint ret = (GLint)duk_to_int(ctx, -1);
-    duk_pop(ctx);
-
-    return ret;
-}
-
 `;
 
 cResult += fs.readFileSync('function_definitions_inline.h', 'utf8');
