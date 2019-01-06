@@ -414,7 +414,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_readPixels(duk_context *ctx) {
     GLuint dstoffset = 0;
     if (argc > 7) {
         dstoffset = (GLuint)duk_get_uint(ctx, 8);
-	pixels = (char*)pixels + dstoffset;
+    pixels = (char*)pixels + dstoffset;
     }
 
     glReadPixels(x,y,width,height,format,type,pixels);
@@ -456,7 +456,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage3D(duk_context *ctx) {
     GLuint offset = 0;
     if (argc > 9) {
         offset = (GLuint)duk_get_uint(ctx, 10);
-	pixels = (char*)pixels + offset;
+    pixels = (char*)pixels + offset;
     }
 
     glTexImage3D(target,level,internalformat,width,height,depth,border,format,type,pixels);

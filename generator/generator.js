@@ -39,68 +39,68 @@ var glTypeDukTypeMap = {
 };
 
 var glTypeDukTypeParameterFunctionMap = {
-	"WebGLProgram": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLShader": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLRenderbuffer": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLTexture": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLFramebuffer": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLBuffer": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLVertexArrayObject": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLTransformFeedback": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLSampler": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLQuery": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
-	"WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_int(ctx, ${index})` },
-	"GLintptr": function(index) { return `((char*)NULL + duk_get_int(ctx, ${index}))` },
-	"GLboolean": function(index) { return `(duk_get_boolean(ctx, ${index}) == 1 ? GL_TRUE : GL_FALSE)` },
-	"Float32Array": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
-	"Int32Array": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
-	"ArrayBufferView": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
-	"ArrayBuffer": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
-	"BufferSource": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
+    "WebGLProgram": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLShader": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLRenderbuffer": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLTexture": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLFramebuffer": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLBuffer": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLVertexArrayObject": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLTransformFeedback": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLSampler": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLQuery": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
+    "WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_int(ctx, ${index})` },
+    "GLintptr": function(index) { return `((char*)NULL + duk_get_int(ctx, ${index}))` },
+    "GLboolean": function(index) { return `(duk_get_boolean(ctx, ${index}) == 1 ? GL_TRUE : GL_FALSE)` },
+    "Float32Array": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
+    "Int32Array": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
+    "ArrayBufferView": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
+    "ArrayBuffer": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
+    "BufferSource": function(index) { return `duk_get_buffer_data(ctx, ${index}, NULL)` },
 };
 
 var glTypeDukTypeReturnFunctionMap = {
-	"WebGLProgram": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLShader": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLUniformLocation": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLRenderbuffer": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLTexture": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLFramebuffer": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLBuffer": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLVertexArrayObject": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLTransformFeedback": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLSampler": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLQuery": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
-	"WebGLUniformLocation": function() { return `dukwebgl_create_object_int(ctx, ret)` },
-	"GLboolean": function(index) { return `duk_push_boolean(ctx, (ret == GL_TRUE ? 1 : 0))` },
+    "WebGLProgram": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLShader": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLUniformLocation": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLRenderbuffer": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLTexture": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLFramebuffer": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLBuffer": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLVertexArrayObject": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLTransformFeedback": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLSampler": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLQuery": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
+    "WebGLUniformLocation": function() { return `dukwebgl_create_object_int(ctx, ret)` },
+    "GLboolean": function(index) { return `duk_push_boolean(ctx, (ret == GL_TRUE ? 1 : 0))` },
 };
 
 var customWebGlBindingImplementations = {
-	"getProgramParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
-	"getProgramInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
-	"shaderSource": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
-	"getShaderParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
-	"getShaderInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
-	"createBuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
-	"deleteBuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
-	"createTexture": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
-	"deleteTexture": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
-	"bufferData": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
-	"texImage2D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
-	"readPixels": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
-	"texSubImage2D": {"argumentCount": 9, "glVersion": "GL_VERSION_2_0"},
-	"texImage3D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
-	"uniformMatrix2fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
-	"uniformMatrix3fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
-	"uniformMatrix4fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
-	"createVertexArray": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
-	"deleteVertexArray": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
+    "getProgramParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
+    "getProgramInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
+    "shaderSource": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
+    "getShaderParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
+    "getShaderInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
+    "createBuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
+    "deleteBuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
+    "createTexture": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
+    "deleteTexture": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
+    "bufferData": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+    "texImage2D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+    "readPixels": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+    "texSubImage2D": {"argumentCount": 9, "glVersion": "GL_VERSION_2_0"},
+    "texImage3D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+    "uniformMatrix2fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
+    "uniformMatrix3fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
+    "uniformMatrix4fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
+    "createVertexArray": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
+    "deleteVertexArray": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
 };
 
 var customWebGlConstantImplementations = {
-	//WebGL = -1, OpenGL: 0xFFFFFFFFFFFFFFFFull (=bigger than duktape uint)
-	"TIMEOUT_IGNORED": {"skip": true}
+    //WebGL = -1, OpenGL: 0xFFFFFFFFFFFFFFFFull (=bigger than duktape uint)
+    "TIMEOUT_IGNORED": {"skip": true}
 };
 
 var constantRegExp = new RegExp(/#\s*define\s+([\w\d_]+)\s+([\w\d-]+)/);
@@ -110,42 +110,42 @@ var currentProcessedVersion = "GL_VERSION_0_0"; // undefined version
 var glVersionList = [currentProcessedVersion];
 
 glCHeader.split("\n").forEach(line => {
-	var match = constantRegExp.exec(line);
-	if (match) {
-		if (match[1].startsWith("GL_VERSION_")) {
-			currentProcessedVersion = match[1];
-			glVersionList.push(currentProcessedVersion);
-		}
-		cConstants.push({"name":match[1], "value":match[2], "glVersion": currentProcessedVersion});
-	} else {
-		match = methodRegExp.exec(line);
-		if (match) {
-			var argumentList = [];
-			match[3].split(",").forEach(argumentString => {
-				if (argumentString == "" || argumentString == "void") {
-					return;
-				}
+    var match = constantRegExp.exec(line);
+    if (match) {
+        if (match[1].startsWith("GL_VERSION_")) {
+            currentProcessedVersion = match[1];
+            glVersionList.push(currentProcessedVersion);
+        }
+        cConstants.push({"name":match[1], "value":match[2], "glVersion": currentProcessedVersion});
+    } else {
+        match = methodRegExp.exec(line);
+        if (match) {
+            var argumentList = [];
+            match[3].split(",").forEach(argumentString => {
+                if (argumentString == "" || argumentString == "void") {
+                    return;
+                }
 
-				var arg = {"original": argumentString};
-				var match = argumentRegExp.exec(argumentString);
-				arg.type = "";
-				if (match[1]) {
-					arg.type += match[1];
-				}
-				arg.type += match[2];
-				arg.type = arg.type.trim();
-				arg.variableName = match[3].trim();
+                var arg = {"original": argumentString};
+                var match = argumentRegExp.exec(argumentString);
+                arg.type = "";
+                if (match[1]) {
+                    arg.type += match[1];
+                }
+                arg.type += match[2];
+                arg.type = arg.type.trim();
+                arg.variableName = match[3].trim();
 
-				if (arg.variableName == "" || arg.type == "") {
-					return;
-				}
+                if (arg.variableName == "" || arg.type == "") {
+                    return;
+                }
 
-				argumentList.push(arg);
-			});
+                argumentList.push(arg);
+            });
 
-			cMethods.push(({"returnType": match[1], "name": match[2], "argumentList": argumentList, "glVersion": currentProcessedVersion}));
-		}
-	}
+            cMethods.push(({"returnType": match[1], "name": match[2], "argumentList": argumentList, "glVersion": currentProcessedVersion}));
+        }
+    }
 });
 
 var cResult = "";
@@ -153,27 +153,27 @@ var constants = [];
 var methods = [];
 
 idl.forEach(element => {
-	if ('members' in element) {
-		element.members.forEach(element => {
-			processConstant(element);
-			processMethod(element);
-		});
-	}
+    if ('members' in element) {
+        element.members.forEach(element => {
+            processConstant(element);
+            processMethod(element);
+        });
+    }
 });
 
 function licenseToHeader() {
-	cResult += "/**\n";
+    cResult += "/**\n";
 
-	fs.readFileSync('LICENSE', 'utf8').split("\n").forEach(line => {
-		cResult += ` * ${line}\n`;
-	});
+    fs.readFileSync('LICENSE', 'utf8').split("\n").forEach(line => {
+        cResult += ` * ${line}\n`;
+    });
 
-	cResult += " */\n";
+    cResult += " */\n";
 }
 
 function processIdlToHeader(idl) {
 
-	cResult += `
+    cResult += `
 #if !defined(DUK_EXTERNAL_DECL) || !defined(DUK_LOCAL)
 #error "Duktape constants not found. Duktape header must be included before dukwebgl!"
 #endif
@@ -226,50 +226,50 @@ DUK_EXTERNAL_DECL void dukwebgl_bind(duk_context *ctx);
     duk_put_prop_string((ctx), -2, #webgl_constant)
 
 DUK_LOCAL void dukwebgl_bind_constants(duk_context *ctx) {
-	`;
+    `;
 
-	// constants NOT defined in OpenGL C API headers
-	constants.forEach(c => {
-		var cConstantName = `GL_${c.name}`;
-		if ('cConstant' in c) {
-			return;
-		}
+    // constants NOT defined in OpenGL C API headers
+    constants.forEach(c => {
+        var cConstantName = `GL_${c.name}`;
+        if ('cConstant' in c) {
+            return;
+        }
 
-		if (c.name in customWebGlConstantImplementations && customWebGlConstantImplementations[c.name].skip === true) {
-			cResult += `/* NOT IMPLEMENTED: ${c.name} */\n`;
-			return;
-		}
+        if (c.name in customWebGlConstantImplementations && customWebGlConstantImplementations[c.name].skip === true) {
+            cResult += `/* NOT IMPLEMENTED: ${c.name} */\n`;
+            return;
+        }
 
-		cResult += `#ifdef ${cConstantName}\n`;
-		cResult += `    dukwebgl_push_constant_property(ctx, ${c.name});\n`;
-		cResult += `#endif\n`;
-	});
+        cResult += `#ifdef ${cConstantName}\n`;
+        cResult += `    dukwebgl_push_constant_property(ctx, ${c.name});\n`;
+        cResult += `#endif\n`;
+    });
 
-	// constants defined in OpenGL C API headers
-	glVersionList.forEach(glVersion => {
-		cResult += `\n#ifdef ${glVersion}\n`
-		constants.forEach(c => {
-			var cConstantName = `GL_${c.name}`;
-			if (!c.cConstant) {
-				return;
-			}
-			if (glVersion !== c.cConstant.glVersion) {
-				return;
-			}
+    // constants defined in OpenGL C API headers
+    glVersionList.forEach(glVersion => {
+        cResult += `\n#ifdef ${glVersion}\n`
+        constants.forEach(c => {
+            var cConstantName = `GL_${c.name}`;
+            if (!c.cConstant) {
+                return;
+            }
+            if (glVersion !== c.cConstant.glVersion) {
+                return;
+            }
 
-			if (c.name in customWebGlConstantImplementations && customWebGlConstantImplementations[c.name].skip === true) {
-				cResult += `/* NOT IMPLEMENTED: ${c.name} */\n`;
-				return;
-			}
+            if (c.name in customWebGlConstantImplementations && customWebGlConstantImplementations[c.name].skip === true) {
+                cResult += `/* NOT IMPLEMENTED: ${c.name} */\n`;
+                return;
+            }
 
-			cResult += `#ifdef ${cConstantName}\n`;
-			cResult += `    dukwebgl_push_constant_property(ctx, ${c.name});\n`;
-			cResult += `#endif\n`;
-		});
-		cResult += `#endif /* ${glVersion} */ \n`
-	});
+            cResult += `#ifdef ${cConstantName}\n`;
+            cResult += `    dukwebgl_push_constant_property(ctx, ${c.name});\n`;
+            cResult += `#endif\n`;
+        });
+        cResult += `#endif /* ${glVersion} */ \n`
+    });
 
-	cResult += `
+    cResult += `
 } /* dukwebgl_bind_constants */
 `;
 
@@ -278,82 +278,82 @@ cResult += fs.readFileSync('function_definitions_inline.h', 'utf8');
 var mappedMethodCount = 0;
 
 glVersionList.forEach(glVersion => {
-	cResult += `\n#ifdef ${glVersion}\n`
+    cResult += `\n#ifdef ${glVersion}\n`
 methods.forEach(m => {
-	if (m.cMethod) {
-		if (glVersion !== m.cMethod.glVersion) {
-			return;
-		}
-	}
-	if (!m.cMethod) {
-		if (glVersion.endsWith("0_0")) {
-			// complain only once
-			cResult += `    /* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) */\n`;
-		}
-		return;
-	}
+    if (m.cMethod) {
+        if (glVersion !== m.cMethod.glVersion) {
+            return;
+        }
+    }
+    if (!m.cMethod) {
+        if (glVersion.endsWith("0_0")) {
+            // complain only once
+            cResult += `    /* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) */\n`;
+        }
+        return;
+    }
 
-	var returnVariable = false;
-	if (m.returnType !== 'void') {
-		returnVariable = true;
+    var returnVariable = false;
+    if (m.returnType !== 'void') {
+        returnVariable = true;
 
-		if (!(m.cMethod.returnType in glTypeDukTypeMap)) {
-			cResult += `    /* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) / ${m.cMethod.returnType} ${m.cMethod.name} (${JSON.stringify(m.cMethod.argumentList)}) */\n`;
-			return;
-		}
-	}
+        if (!(m.cMethod.returnType in glTypeDukTypeMap)) {
+            cResult += `    /* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) / ${m.cMethod.returnType} ${m.cMethod.name} (${JSON.stringify(m.cMethod.argumentList)}) */\n`;
+            return;
+        }
+    }
 
-	var cCallVariables = [];
-	var cResultArguments = "";
-	for (var i = 0; i < m.cMethod.argumentList.length; i++) {
-		var argument = m.argumentList[i];
-		var cArgument = m.cMethod.argumentList[i];
-		cResultArguments += `    ${cArgument.type} ${cArgument.variableName} = `
-		if (argument.type in glTypeDukTypeParameterFunctionMap) {
-			cResultArguments += `(${cArgument.type})${glTypeDukTypeParameterFunctionMap[argument.type](i)};\n`
-		} else {
-			var dukInputArgumentType = glTypeDukTypeMap[argument.type];
-			if (!dukInputArgumentType) {
-				cResult += `    /* Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.name}. argument: ${argument.type} vs. ${cArgument.type} */`;
-				return;
-			}
+    var cCallVariables = [];
+    var cResultArguments = "";
+    for (var i = 0; i < m.cMethod.argumentList.length; i++) {
+        var argument = m.argumentList[i];
+        var cArgument = m.cMethod.argumentList[i];
+        cResultArguments += `    ${cArgument.type} ${cArgument.variableName} = `
+        if (argument.type in glTypeDukTypeParameterFunctionMap) {
+            cResultArguments += `(${cArgument.type})${glTypeDukTypeParameterFunctionMap[argument.type](i)};\n`
+        } else {
+            var dukInputArgumentType = glTypeDukTypeMap[argument.type];
+            if (!dukInputArgumentType) {
+                cResult += `    /* Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.name}. argument: ${argument.type} vs. ${cArgument.type} */`;
+                return;
+            }
 
-			cResultArguments += `(${cArgument.type})duk_get_${dukInputArgumentType}(ctx, ${i});\n`
-		}
+            cResultArguments += `(${cArgument.type})duk_get_${dukInputArgumentType}(ctx, ${i});\n`
+        }
 
-		cCallVariables.push(`${cArgument.variableName}`);
-	}
+        cCallVariables.push(`${cArgument.variableName}`);
+    }
 
-	cResult += `\nDUK_LOCAL duk_ret_t dukwebgl_${m.cMethod.name}(duk_context *ctx) {\n`
-	cResult += cResultArguments;
+    cResult += `\nDUK_LOCAL duk_ret_t dukwebgl_${m.cMethod.name}(duk_context *ctx) {\n`
+    cResult += cResultArguments;
 
-	var cCall = `${m.cMethod.name}(${cCallVariables.join()})`;
+    var cCall = `${m.cMethod.name}(${cCallVariables.join()})`;
 
-	if (returnVariable) {
-		var dukReturnType = glTypeDukTypeMap[m.cMethod.returnType];
-		cResult += `    ${m.cMethod.returnType} ret = ${cCall};\n`;
-		if (m.returnType in glTypeDukTypeReturnFunctionMap) {
-			cResult += `    ${glTypeDukTypeReturnFunctionMap[m.returnType]()};\n`;
-		} else if (m.returnType === m.cMethod.returnType) {
-			cResult += `    duk_push_${dukReturnType}(ctx, ret);\n`;
-		} else {
-			throw `Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.returnType} ${m.cMethod.name}`;
-		}
-	} else {
-		cResult += `    ${cCall};\n`;
-	}
+    if (returnVariable) {
+        var dukReturnType = glTypeDukTypeMap[m.cMethod.returnType];
+        cResult += `    ${m.cMethod.returnType} ret = ${cCall};\n`;
+        if (m.returnType in glTypeDukTypeReturnFunctionMap) {
+            cResult += `    ${glTypeDukTypeReturnFunctionMap[m.returnType]()};\n`;
+        } else if (m.returnType === m.cMethod.returnType) {
+            cResult += `    duk_push_${dukReturnType}(ctx, ret);\n`;
+        } else {
+            throw `Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.returnType} ${m.cMethod.name}`;
+        }
+    } else {
+        cResult += `    ${cCall};\n`;
+    }
 
-	cResult += `    return ${returnVariable ? 1 : 0};\n`;
-	cResult += `}\n`;
+    cResult += `    return ${returnVariable ? 1 : 0};\n`;
+    cResult += `}\n`;
 
-	m.definitionGenerated = true;
-	mappedMethodCount++;
+    m.definitionGenerated = true;
+    mappedMethodCount++;
 });
-	cResult += `#endif /* ${glVersion} */\n`
+    cResult += `#endif /* ${glVersion} */\n`
 });
 
 
-	cResult += `
+    cResult += `
 DUK_LOCAL duk_ret_t dukwebgl_WebGL2RenderingContext(duk_context *ctx) {
     duk_push_object(ctx);
 
@@ -369,33 +369,33 @@ void dukwebgl_bind(duk_context *ctx) {
     duk_push_object(ctx);
     dukwebgl_bind_constants(ctx);\n`;
 
-	glVersionList.forEach(glVersion => {
-		cResult += `\n#ifdef ${glVersion}\n`
-		Object.entries(customWebGlBindingImplementations).forEach(entry => {
-			let key = entry[0];
-			let value = entry[1];
+    glVersionList.forEach(glVersion => {
+        cResult += `\n#ifdef ${glVersion}\n`
+        Object.entries(customWebGlBindingImplementations).forEach(entry => {
+            let key = entry[0];
+            let value = entry[1];
 
-			if (value.glVersion !== glVersion) {
-				return;
-			}
+            if (value.glVersion !== glVersion) {
+                return;
+            }
 
-			cResult += `        dukwebgl_bind_function(ctx, custom_impl_${key}, ${key}, ${value.argumentCount});\n`;
-		});
+            cResult += `        dukwebgl_bind_function(ctx, custom_impl_${key}, ${key}, ${value.argumentCount});\n`;
+        });
 
-		methods.forEach(m => {
-			if (m.definitionGenerated !== true) {
-				return;
-			}
+        methods.forEach(m => {
+            if (m.definitionGenerated !== true) {
+                return;
+            }
 
-			if (m.cMethod.glVersion !== glVersion) {
-				return;
-			}
+            if (m.cMethod.glVersion !== glVersion) {
+                return;
+            }
 
-			// has a C function definition, binding can be done
-			cResult += `        dukwebgl_bind_function(ctx, ${m.cMethod.name}, ${m.name}, ${m.cMethod.argumentList.length});\n`;
-		});
-		cResult += `#endif /* ${glVersion} */\n`
-	});
+            // has a C function definition, binding can be done
+            cResult += `        dukwebgl_bind_function(ctx, ${m.cMethod.name}, ${m.name}, ${m.cMethod.argumentList.length});\n`;
+        });
+        cResult += `#endif /* ${glVersion} */\n`
+    });
 
     cResult += `
     /* Function binding coverage = ${mappedMethodCount}/${methods.length} = ${mappedMethodCount/methods.length*100.0} % */
@@ -410,49 +410,49 @@ void dukwebgl_bind(duk_context *ctx) {
 }
 
 function processConstant(element) {
-	if (element.type !== "const") {
-		return;
-	}
+    if (element.type !== "const") {
+        return;
+    }
 
-	var name = element.name;
-	var value = element.value.value;
+    var name = element.name;
+    var value = element.value.value;
 
-	var cConstant = cConstants.find(c => c.name === `GL_${name}`);
-	//if (!cConstant) {
-	//	console.log(`Contant ${name} not defined in C header!`);
-	//}
-	constants.push({"name": name, "value": value, "cConstant": cConstant });
+    var cConstant = cConstants.find(c => c.name === `GL_${name}`);
+    //if (!cConstant) {
+    //    console.log(`Contant ${name} not defined in C header!`);
+    //}
+    constants.push({"name": name, "value": value, "cConstant": cConstant });
 }
 
 function processMethod(element) {
-	if (element.type !== "operation" || !"body" in element) {
-		return;
-	}
+    if (element.type !== "operation" || !"body" in element) {
+        return;
+    }
 
-	var body = element.body;
+    var body = element.body;
 
-	var returnType = body.idlType.idlType;
-	var name = body.name.value;
-	var argumentList = [];
+    var returnType = body.idlType.idlType;
+    var name = body.name.value;
+    var argumentList = [];
 
-	if (name in customWebGlBindingImplementations) {
-		// custom implementation, do not process automatically
-		return;
-	}
+    if (name in customWebGlBindingImplementations) {
+        // custom implementation, do not process automatically
+        return;
+    }
 
-	if ("arguments" in body) {
-		body.arguments.forEach(argument => {
-			var type = argument.idlType.idlType;
-			argumentList.push({"original": type, "type": type});
-		});
-	}
+    if ("arguments" in body) {
+        body.arguments.forEach(argument => {
+            var type = argument.idlType.idlType;
+            argumentList.push({"original": type, "type": type});
+        });
+    }
 
-	var cMethodName = "gl" + name[0].toUpperCase() + name.slice(1); 
-	var cMethod = cMethods.find(c => c.name === cMethodName && c.argumentList.length === argumentList.length);
-	/*if (!cMethod) {
-		console.log(`Mehthod ${name}/${cMethodName} not defined in C header!`);
-	}*/
-	methods.push({"returnType": returnType, "name": name, "argumentList": argumentList, "cMethod": cMethod});
+    var cMethodName = "gl" + name[0].toUpperCase() + name.slice(1); 
+    var cMethod = cMethods.find(c => c.name === cMethodName && c.argumentList.length === argumentList.length);
+    /*if (!cMethod) {
+        console.log(`Mehthod ${name}/${cMethodName} not defined in C header!`);
+    }*/
+    methods.push({"returnType": returnType, "name": name, "argumentList": argumentList, "cMethod": cMethod});
 }
 
 licenseToHeader();
