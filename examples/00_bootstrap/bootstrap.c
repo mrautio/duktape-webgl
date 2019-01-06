@@ -52,6 +52,64 @@ static void eval_js(duk_context *ctx, const char *data) {
     duk_pop(ctx);
 }
 
+/* Helper function to check that no OpenGL errors occur */
+static duk_bool_t is_gl_error() {
+    GLenum error_code = glGetError();
+    if (error_code != GL_NO_ERROR) {
+        const char *error_string;
+
+        switch(error_code) {
+#ifdef GL_INVALID_ENUM
+            case GL_INVALID_ENUM:
+                error_string = "GL_INVALID_ENUM";
+                break;
+#endif
+#ifdef GL_INVALID_VALUE
+            case GL_INVALID_VALUE:
+                error_string = "GL_INVALID_VALUE";
+                break;
+#endif
+#ifdef GL_INVALID_OPERATION
+            case GL_INVALID_OPERATION:
+                error_string = "GL_INVALID_OPERATION";
+                break;
+#endif
+#ifdef GL_INVALID_FRAMEBUFFER_OPERATION
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                error_string = "GL_INVALID_FRAMEBUFFER_OPERATION";
+                break;
+#endif
+#ifdef GL_OUT_OF_MEMORY
+            case GL_OUT_OF_MEMORY:
+                error_string = "GL_OUT_OF_MEMORY";
+                break;
+#endif
+#ifdef GL_STACK_UNDERFLOW
+            case GL_STACK_UNDERFLOW:
+                error_string = "GL_STACK_UNDERFLOW";
+                break;
+#endif
+#ifdef GL_STACK_OVERFLOW
+            case GL_STACK_OVERFLOW:
+                error_string = "GL_STACK_OVERFLOW";
+                break;
+#endif
+            default:
+                error_string = "N/A";
+                break;
+        }
+
+        fprintf(stderr, "OpenGL error occurred: %s (0x%X). OpenGL: %s, GLSL: %s\n",
+                error_string, error_code,
+                glGetString(GL_VERSION),
+                glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+        return 1;
+    }
+
+    return 0;
+}
+
 static void cleanup(void) {
     if (data) {
         free(data);
@@ -63,6 +121,9 @@ static void cleanup(void) {
 
     if (ctx) {
         eval_js(ctx, "if (typeof cleanup === 'function') { cleanup(); } ");
+
+        /* Check for OpenGL errors. TODO: figure out error exit if cleanup fails */
+        is_gl_error();
 
         duk_destroy_heap(ctx);
     }
@@ -123,64 +184,6 @@ static void save_screenshot(unsigned long frame, int width, int height) {
         fprintf(stderr, "Could not write to file '%s'! %lu <=> %d\n", file, written, pixels);
         exit(EXIT_FAILURE);
     }
-}
-
-/* Helper function to check that no OpenGL errors occur */
-static duk_bool_t is_gl_error() {
-    GLenum error_code = glGetError();
-    if (error_code != GL_NO_ERROR) {
-        const char *error_string;
-
-        switch(error_code) {
-#ifdef GL_INVALID_ENUM
-            case GL_INVALID_ENUM:
-                error_string = "GL_INVALID_ENUM";
-                break;
-#endif
-#ifdef GL_INVALID_VALUE
-            case GL_INVALID_VALUE:
-                error_string = "GL_INVALID_VALUE";
-                break;
-#endif
-#ifdef GL_INVALID_OPERATION
-            case GL_INVALID_OPERATION:
-                error_string = "GL_INVALID_OPERATION";
-                break;
-#endif
-#ifdef GL_INVALID_FRAMEBUFFER_OPERATION
-            case GL_INVALID_FRAMEBUFFER_OPERATION:
-                error_string = "GL_INVALID_FRAMEBUFFER_OPERATION";
-                break;
-#endif
-#ifdef GL_OUT_OF_MEMORY
-            case GL_OUT_OF_MEMORY:
-                error_string = "GL_OUT_OF_MEMORY";
-                break;
-#endif
-#ifdef GL_STACK_UNDERFLOW
-            case GL_STACK_UNDERFLOW:
-                error_string = "GL_STACK_UNDERFLOW";
-                break;
-#endif
-#ifdef GL_STACK_OVERFLOW
-            case GL_STACK_OVERFLOW:
-                error_string = "GL_STACK_OVERFLOW";
-                break;
-#endif
-            default:
-                error_string = "N/A";
-                break;
-        }
-
-        fprintf(stderr, "OpenGL error occurred: %s (0x%X). OpenGL: %s, GLSL: %s\n",
-                error_string, error_code,
-                glGetString(GL_VERSION),
-                glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-        return 1;
-    }
-
-    return 0;
 }
 
 int main (int argc, char **argv) {
