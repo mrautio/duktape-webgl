@@ -464,3 +464,27 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage3D(duk_context *ctx) {
 }
 
 #endif /* GL_VERSION_2_0 */
+
+#ifdef GL_VERSION_3_0
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createVertexArray(duk_context *ctx) {
+    GLuint arrays[1];
+
+    glGenVertexArrays(1, arrays);
+    /* GL 4.5: void glCreateVertexArrays(GLsizei n, GLuint *arrays); */
+
+    dukwebgl_create_object_uint(ctx, arrays[0]);
+
+    return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteVertexArray(duk_context *ctx) {
+    GLuint array = dukwebgl_get_object_id_uint(ctx, 0);
+    GLuint arrays[1] = { array };
+
+    glDeleteVertexArrays(1, arrays);
+
+    return 0;
+}
+
+#endif /* GL_VERSION_3_0 */
