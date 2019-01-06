@@ -14,7 +14,7 @@
 
 ## Setup
 
-* Include dukwebgl.h to your Duktape & OpenGL project.
+* Include [dukwebgl.h](https://github.com/mrautio/duktape-webgl/releases) to your Duktape & OpenGL project.
 
 ### C initialization example
 
