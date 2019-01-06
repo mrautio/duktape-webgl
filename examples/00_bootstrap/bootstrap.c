@@ -91,6 +91,10 @@ static duk_ret_t c_js_exit(duk_context *ctx) {
 	return 0;
 }
 
+/**
+ * Save screenshot as raw rgba
+ * Convert to PNG example: convert -flip -size 640x480 -depth 8 rgba:tmpscreenshot_000000.rgb screenshot_draw_image.png
+ */
 static void save_screenshot(unsigned long frame, int width, int height) {    
 	const int channels = 4;
     const int pixels = width * height * channels;

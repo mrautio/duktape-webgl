@@ -20,3 +20,13 @@ Luckily there are plenty of good tutorials, so if you're interested in learning 
 ```
 docker build -t duktape-webgl-examples . && docker run --rm -t duktape-webgl-examples
 ```
+
+### Debugging non-success exits
+
+* If screenshots are too different, then you can check them out by re-running container and copying screenshots to host machine
+```
+docker run -v /tmp/screenshots:/tmp/screenshots -i -t duktape-webgl-examples bash
+root@75641f01089d:/tmp# sh docker_entrypoint.sh 
+root@75641f01089d:/tmp# cp screenshot*png /tmp/screenshots/
+```
+
