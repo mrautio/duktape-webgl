@@ -52,7 +52,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix2fv(duk_context *ctx) {
     GLuint location = dukwebgl_get_object_id_uint(ctx, 0);
     GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE);
     duk_size_t count = 0;
-    const GLfloat *value = duk_get_buffer_data(ctx, 2, &count);
+    const GLfloat *value = (const GLfloat *)duk_get_buffer_data(ctx, 2, &count);
 
     glUniformMatrix2fv(location, (GLsizei)count, transpose, value);
 
@@ -63,7 +63,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix3fv(duk_context *ctx) {
     GLuint location = dukwebgl_get_object_id_uint(ctx, 0);
     GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE);
     duk_size_t count = 0;
-    const GLfloat *value = duk_get_buffer_data(ctx, 2, &count);
+    const GLfloat *value = (const GLfloat *)duk_get_buffer_data(ctx, 2, &count);
 
     glUniformMatrix3fv(location, (GLsizei)count, transpose, value);
 
@@ -74,7 +74,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix4fv(duk_context *ctx) {
     GLuint location = dukwebgl_get_object_id_uint(ctx, 0);
     GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE);
     duk_size_t count = 0;
-    const GLfloat *value = duk_get_buffer_data(ctx, 2, &count);
+    const GLfloat *value = (const GLfloat *)duk_get_buffer_data(ctx, 2, &count);
 
     glUniformMatrix4fv(location, (GLsizei)count, transpose, value);
 
