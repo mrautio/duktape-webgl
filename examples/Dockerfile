@@ -16,6 +16,10 @@ ADD 01_grey_screen 01_grey_screen
 ADD 02_hello_triangle 02_hello_triangle
 ADD 03_draw_image 03_draw_image
 
+# Compile the main bootstrap
 RUN cd 00_bootstrap && make
+
+# Compile the C++ test program, to verify that C++ compilation is OK
+RUN cd 00_bootstrap && ln -s bootstrap.c bootstrap.cpp && make test-cpp-compile
 
 CMD ["sh", "docker_entrypoint.sh"]

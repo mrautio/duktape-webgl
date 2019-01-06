@@ -96,23 +96,30 @@ static duk_ret_t c_js_exit(duk_context *ctx) {
  * Convert to PNG example: convert -flip -size 640x480 -depth 8 rgba:tmpscreenshot_000000.rgb screenshot_draw_image.png
  */
 static void save_screenshot(unsigned long frame, int width, int height) {    
-	const int channels = 4;
+    const int channels = 4;
     const int pixels = width * height * channels;
     char file[64];
     snprintf(file, 64, "tmpscreenshot_%06lu.rgb", frame);
 
-    unsigned char data[pixels];
+    unsigned char *data = (unsigned char*)malloc(pixels * sizeof(unsigned char));
+    if (data == NULL) {
+    	fprintf(stderr, "Could not allocate memory for screenshot saving!\n");
+    	exit(EXIT_FAILURE);
+    }
+
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     FILE *of = fopen(file, "wb");
     if (of == NULL) {
+    	free(data);
     	fprintf(stderr, "Could not open file '%s' for writing!\n", file);
     	exit(EXIT_FAILURE);
     }
     size_t written = fwrite(data, sizeof(char), pixels, of);
     fclose(of);
+    free(data);
 
-    if (written != pixels) {
+    if (written != (size_t)pixels) {
     	fprintf(stderr, "Could not write to file '%s'! %lu <=> %d\n", file, written, pixels);
     	exit(EXIT_FAILURE);
     }
@@ -270,7 +277,7 @@ int main (int argc, char **argv) {
 		}
 
 		size_t read_size = fread(data, sizeof(char), size, f);
-		if (read_size != size) {
+		if (read_size != (size_t)size) {
 			fprintf(stderr, "Could not read file completely: %s, %ld <=> %ld\n", file, size, read_size);
 			exit(EXIT_FAILURE);
 		}
