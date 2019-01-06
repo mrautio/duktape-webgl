@@ -12,7 +12,7 @@ DUK_LOCAL void dukwebgl_create_object_uint(duk_context *ctx, GLuint id) {
 DUK_LOCAL GLuint dukwebgl_get_object_id_uint(duk_context *ctx, duk_idx_t obj_idx) {
     GLuint ret = 0;
 
-    // everything else than object assumed null
+    /* everything else than object assumed null */
     if (duk_is_object(ctx, obj_idx)) {
         duk_get_prop_string(ctx, obj_idx, "_id");
         ret = (GLuint)duk_to_uint(ctx, -1);
@@ -36,7 +36,7 @@ DUK_LOCAL void dukwebgl_create_object_int(duk_context *ctx, GLint id) {
 DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) {
     GLint ret = 0;
 
-    // everything else than object assumed null
+    /* everything else than object assumed null */
     if (duk_is_object(ctx, obj_idx)) {
         duk_get_prop_string(ctx, obj_idx, "_id");
         ret = (GLint)duk_to_int(ctx, -1);
@@ -48,38 +48,50 @@ DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) 
 
 #ifdef GL_VERSION_2_0
 
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix2fv(duk_context *ctx) {
-    GLuint location = dukwebgl_get_object_id_uint(ctx, 0);
-    GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE);
-    duk_size_t count = 0;
-    const GLfloat *value = (const GLfloat *)duk_get_buffer_data(ctx, 2, &count);
+/* FIXME: srcOffset / srcLength support : https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/uniformMatrix */
+#define DEFINE_UNIFORM_MATRIX(jsFunctionName, cFunctionName) \
+    DUK_LOCAL duk_ret_t dukwebgl_custom_impl_##jsFunctionName (duk_context *ctx) { \
+        GLuint location = dukwebgl_get_object_id_uint(ctx, 0); \
+        GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE); \
+        duk_size_t count = 0; \
+        const GLfloat *value = (const GLfloat *)duk_get_buffer_data(ctx, 2, &count); \
+        cFunctionName (location, (GLsizei)count, transpose, value); \
+        return 0; \
+    }
 
-    glUniformMatrix2fv(location, (GLsizei)count, transpose, value);
+DEFINE_UNIFORM_MATRIX(uniformMatrix2fv, glUniformMatrix2fv)
+DEFINE_UNIFORM_MATRIX(uniformMatrix3fv, glUniformMatrix3fv)
+DEFINE_UNIFORM_MATRIX(uniformMatrix4fv, glUniformMatrix4fv)
+DEFINE_UNIFORM_MATRIX(uniformMatrix2x3fv, glUniformMatrix2x3fv)
+DEFINE_UNIFORM_MATRIX(uniformMatrix2x4fv, glUniformMatrix2x4fv)
+DEFINE_UNIFORM_MATRIX(uniformMatrix3x2fv, glUniformMatrix3x2fv)
+DEFINE_UNIFORM_MATRIX(uniformMatrix3x4fv, glUniformMatrix3x4fv)
+DEFINE_UNIFORM_MATRIX(uniformMatrix4x2fv, glUniformMatrix4x2fv)
+DEFINE_UNIFORM_MATRIX(uniformMatrix4x3fv, glUniformMatrix4x3fv)
 
-    return 0;
-}
+#define DEFINE_UNIFORM_FV(jsFunctionName, cType, cFunctionName) \
+    DUK_LOCAL duk_ret_t dukwebgl_custom_impl_##jsFunctionName (duk_context *ctx) { \
+        GLuint location = dukwebgl_get_object_id_uint(ctx, 0); \
+        duk_size_t count = 0; \
+        const cType *value = (const cType *)duk_get_buffer_data(ctx, 2, &count); \
+        cFunctionName (location, (GLsizei)count, value); \
+        return 0; \
+    }
 
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix3fv(duk_context *ctx) {
-    GLuint location = dukwebgl_get_object_id_uint(ctx, 0);
-    GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE);
-    duk_size_t count = 0;
-    const GLfloat *value = (const GLfloat *)duk_get_buffer_data(ctx, 2, &count);
+DEFINE_UNIFORM_FV(uniform1fv, GLfloat, glUniform1fv)
+DEFINE_UNIFORM_FV(uniform2fv, GLfloat, glUniform2fv)
+DEFINE_UNIFORM_FV(uniform3fv, GLfloat, glUniform3fv)
+DEFINE_UNIFORM_FV(uniform4fv, GLfloat, glUniform4fv)
 
-    glUniformMatrix3fv(location, (GLsizei)count, transpose, value);
+DEFINE_UNIFORM_FV(uniform1iv, GLint, glUniform1iv)
+DEFINE_UNIFORM_FV(uniform2iv, GLint, glUniform2iv)
+DEFINE_UNIFORM_FV(uniform3iv, GLint, glUniform3iv)
+DEFINE_UNIFORM_FV(uniform4iv, GLint, glUniform4iv)
 
-    return 0;
-}
-
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_uniformMatrix4fv(duk_context *ctx) {
-    GLuint location = dukwebgl_get_object_id_uint(ctx, 0);
-    GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE);
-    duk_size_t count = 0;
-    const GLfloat *value = (const GLfloat *)duk_get_buffer_data(ctx, 2, &count);
-
-    glUniformMatrix4fv(location, (GLsizei)count, transpose, value);
-
-    return 0;
-}
+DEFINE_UNIFORM_FV(uniform1uiv, GLuint, glUniform1uiv)
+DEFINE_UNIFORM_FV(uniform2uiv, GLuint, glUniform2uiv)
+DEFINE_UNIFORM_FV(uniform3uiv, GLuint, glUniform3uiv)
+DEFINE_UNIFORM_FV(uniform4uiv, GLuint, glUniform4uiv)
 
 /* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getProgramParameter */
 DUK_LOCAL void dukwebgl_push_boolean_program_parameter(duk_context *ctx, GLuint program, GLenum pname) {
