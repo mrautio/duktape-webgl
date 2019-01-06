@@ -22,8 +22,8 @@ screenshot_diff ()
 	# convert raw format and flip the image
 	convert -size 640x480 -depth 8 +flip rgba:tmpscreenshot_000000.rgb $1
 
-	# compare screenshots for differences
-	compare -verbose -metric AE $ACTUAL $EXPECTED null: 2>&1 || assert_ret $? 0
+	# compare screenshots for differences, allow small color differences with fuzzing
+	compare -verbose -metric AE -fuzz 1% $ACTUAL $EXPECTED null: 2>&1 || assert_ret $? 0
 }
 
 # start virtual framebuffer
