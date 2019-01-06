@@ -96,6 +96,10 @@ var customWebGlBindingImplementations = {
     "uniformMatrix4fv": {"argumentCount": 3, "glVersion": "GL_VERSION_2_0"},
     "createVertexArray": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
     "deleteVertexArray": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
+    "createFramebuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
+    "deleteFramebuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
+    "createRenderbuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
+    "deleteRenderbuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
 };
 
 var customWebGlConstantImplementations = {

@@ -487,4 +487,44 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteVertexArray(duk_context *ctx) {
     return 0;
 }
 
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createFramebuffer(duk_context *ctx) {
+    GLuint ids[1];
+
+    glGenFramebuffers(1, ids);
+    /* GL 4.5: void glCreateFramebuffers(GLsizei n, GLuint *ids); */
+
+    dukwebgl_create_object_uint(ctx, ids[0]);
+
+    return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteFramebuffer(duk_context *ctx) {
+    GLuint id = dukwebgl_get_object_id_uint(ctx, 0);
+    GLuint ids[1] = { id };
+
+    glDeleteFramebuffers(1, ids);
+
+    return 0;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createRenderbuffer(duk_context *ctx) {
+    GLuint renderbuffers[1];
+
+    glGenRenderbuffers(1, renderbuffers);
+    /* GL 4.5: void glCreateRenderbuffers(GLsizei n, GLuint *ids); */
+
+    dukwebgl_create_object_uint(ctx, renderbuffers[0]);
+
+    return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteRenderbuffer(duk_context *ctx) {
+    GLuint renderbuffer = dukwebgl_get_object_id_uint(ctx, 0);
+    GLuint renderbuffers[1] = { renderbuffer };
+
+    glDeleteRenderbuffers(1, renderbuffers);
+
+    return 0;
+}
+
 #endif /* GL_VERSION_3_0 */

@@ -40,3 +40,4 @@ sleep 5s
 00_bootstrap/bootstrap.exe 01_grey_screen/grey_screen.js && screenshot_diff screenshot_01_actual.png 01_grey_screen/screenshot_grey_screen.png
 00_bootstrap/bootstrap.exe 02_hello_triangle/hello_triangle.js && screenshot_diff screenshot_02_actual.png 02_hello_triangle/screenshot_hello_triangle.png
 00_bootstrap/bootstrap.exe 03_draw_image/draw_image.js && screenshot_diff screenshot_03_actual.png 03_draw_image/screenshot_draw_image.png
+00_bootstrap/bootstrap.exe 04_render_to_texture/render_to_texture.js && screenshot_diff screenshot_04_actual.png 04_render_to_texture/screenshot_render_to_texture.png

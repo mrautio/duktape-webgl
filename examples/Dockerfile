@@ -15,6 +15,7 @@ ADD 00_bootstrap 00_bootstrap
 ADD 01_grey_screen 01_grey_screen
 ADD 02_hello_triangle 02_hello_triangle
 ADD 03_draw_image 03_draw_image
+ADD 04_render_to_texture 04_render_to_texture
 
 # Compile the main bootstrap
 RUN cd 00_bootstrap && make
