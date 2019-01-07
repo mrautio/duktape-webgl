@@ -46,6 +46,20 @@ DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) 
     return ret;
 }
 
+#ifdef GL_VERSION_1_0
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_isContextLost(duk_context *ctx) {
+    /*
+     * ref. https://www.khronos.org/registry/webgl/specs/latest/1.0/#5.14.13
+     * Note: context is assumably never lost in Duktape implementation.
+     * This function is not available in normal OpenGL.
+     */
+    duk_push_false(ctx);
+    return 1;
+}
+
+#endif /* GL_VERSION_1_0 */
+
 #define DEFINE_CREATE_OBJECT(jsFunctionName, cFunctionName) \
     DUK_LOCAL duk_ret_t dukwebgl_custom_impl_##jsFunctionName (duk_context *ctx) { \
         GLuint ids[1]; \
