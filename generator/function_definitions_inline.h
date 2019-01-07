@@ -46,7 +46,32 @@ DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) 
     return ret;
 }
 
+#define DEFINE_CREATE_OBJECT(jsFunctionName, cFunctionName) \
+    DUK_LOCAL duk_ret_t dukwebgl_custom_impl_##jsFunctionName (duk_context *ctx) { \
+        GLuint ids[1]; \
+        cFunctionName (1, ids); \
+        dukwebgl_create_object_uint(ctx, ids[0]); \
+        return 1; \
+    }
+
+#define DEFINE_DELETE_OBJECT(jsFunctionName, cFunctionName) \
+    DUK_LOCAL duk_ret_t dukwebgl_custom_impl_##jsFunctionName (duk_context *ctx) { \
+        GLuint id = dukwebgl_get_object_id_uint(ctx, 0); \
+        GLuint ids[1] = { id }; \
+        cFunctionName (1, ids); \
+        return 0; \
+    }
+
 #ifdef GL_VERSION_2_0
+
+DEFINE_CREATE_OBJECT(createBuffer, glGenBuffers)
+DEFINE_DELETE_OBJECT(deleteBuffer, glDeleteBuffers)
+
+DEFINE_CREATE_OBJECT(createTexture, glGenTextures)
+DEFINE_DELETE_OBJECT(deleteTexture, glDeleteTextures)
+
+DEFINE_CREATE_OBJECT(createQuery, glGenQueries)
+DEFINE_DELETE_OBJECT(deleteQuery, glDeleteQueries)
 
 /* FIXME: srcOffset / srcLength support : https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/uniformMatrix */
 #define DEFINE_UNIFORM_MATRIX(jsFunctionName, cFunctionName) \
@@ -245,46 +270,6 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_shaderSource(duk_context *ctx) {
     return 0;
 }
 
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createBuffer(duk_context *ctx) {
-    GLuint buffers[1];
-
-    glGenBuffers(1, buffers);
-    /* GL 4.5: void glCreateBuffers(GLsizei n, GLuint *buffers); */
-
-    dukwebgl_create_object_uint(ctx, buffers[0]);
-
-    return 1;
-}
-
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteBuffer(duk_context *ctx) {
-    GLuint buffer = dukwebgl_get_object_id_uint(ctx, 0);
-    GLuint buffers[1] = { buffer };
-
-    glDeleteBuffers(1, buffers);
-
-    return 0;
-}
-
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createTexture(duk_context *ctx) {
-    GLuint textures[1];
-
-    glGenTextures(1, textures);
-    /* GL 4.5: void glCreateTextures(GLenum target, GLsizei n, GLuint *textures); */
-
-    dukwebgl_create_object_uint(ctx, textures[0]);
-
-    return 1;
-}
-
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteTexture(duk_context *ctx) {
-    GLuint texture = dukwebgl_get_object_id_uint(ctx, 0);
-    GLuint textures[1] = { texture };
-
-    glDeleteTextures(1, textures);
-
-    return 0;
-}
-
 /* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bufferData */
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_bufferData(duk_context *ctx) {
     int argc = duk_get_top(ctx);
@@ -479,64 +464,27 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage3D(duk_context *ctx) {
 
 #ifdef GL_VERSION_3_0
 
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createVertexArray(duk_context *ctx) {
-    GLuint arrays[1];
+DEFINE_CREATE_OBJECT(createVertexArray, glGenVertexArrays)
+DEFINE_DELETE_OBJECT(deleteVertexArray, glDeleteVertexArrays)
 
-    glGenVertexArrays(1, arrays);
-    /* GL 4.5: void glCreateVertexArrays(GLsizei n, GLuint *arrays); */
+DEFINE_CREATE_OBJECT(createFramebuffer, glGenFramebuffers)
+DEFINE_DELETE_OBJECT(deleteFramebuffer, glDeleteFramebuffers)
 
-    dukwebgl_create_object_uint(ctx, arrays[0]);
-
-    return 1;
-}
-
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteVertexArray(duk_context *ctx) {
-    GLuint array = dukwebgl_get_object_id_uint(ctx, 0);
-    GLuint arrays[1] = { array };
-
-    glDeleteVertexArrays(1, arrays);
-
-    return 0;
-}
-
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createFramebuffer(duk_context *ctx) {
-    GLuint ids[1];
-
-    glGenFramebuffers(1, ids);
-    /* GL 4.5: void glCreateFramebuffers(GLsizei n, GLuint *ids); */
-
-    dukwebgl_create_object_uint(ctx, ids[0]);
-
-    return 1;
-}
-
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteFramebuffer(duk_context *ctx) {
-    GLuint id = dukwebgl_get_object_id_uint(ctx, 0);
-    GLuint ids[1] = { id };
-
-    glDeleteFramebuffers(1, ids);
-
-    return 0;
-}
-
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_createRenderbuffer(duk_context *ctx) {
-    GLuint renderbuffers[1];
-
-    glGenRenderbuffers(1, renderbuffers);
-    /* GL 4.5: void glCreateRenderbuffers(GLsizei n, GLuint *ids); */
-
-    dukwebgl_create_object_uint(ctx, renderbuffers[0]);
-
-    return 1;
-}
-
-DUK_LOCAL duk_ret_t dukwebgl_custom_impl_deleteRenderbuffer(duk_context *ctx) {
-    GLuint renderbuffer = dukwebgl_get_object_id_uint(ctx, 0);
-    GLuint renderbuffers[1] = { renderbuffer };
-
-    glDeleteRenderbuffers(1, renderbuffers);
-
-    return 0;
-}
+DEFINE_CREATE_OBJECT(createRenderbuffer, glGenRenderbuffers)
+DEFINE_DELETE_OBJECT(deleteRenderbuffer, glDeleteRenderbuffers)
 
 #endif /* GL_VERSION_3_0 */
+
+#ifdef GL_VERSION_3_2
+
+DEFINE_CREATE_OBJECT(createSampler, glGenSamplers)
+DEFINE_DELETE_OBJECT(deleteSampler, glDeleteSamplers)
+
+#endif /* GL_VERSION_3_2 */
+
+#ifdef GL_VERSION_4_0
+
+DEFINE_CREATE_OBJECT(createTransformFeedback, glGenTransformFeedbacks)
+DEFINE_DELETE_OBJECT(deleteTransformFeedback, glDeleteTransformFeedbacks)
+
+#endif /* GL_VERSION_4_0 */

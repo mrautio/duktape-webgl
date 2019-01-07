@@ -86,6 +86,8 @@ var customWebGlBindingImplementations = {
     "deleteBuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "createTexture": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
     "deleteTexture": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
+    "createQuery": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
+    "deleteQuery": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "bufferData": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
     "texImage2D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
     "readPixels": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
@@ -118,6 +120,10 @@ var customWebGlBindingImplementations = {
     "deleteFramebuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
     "createRenderbuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
     "deleteRenderbuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
+    "createSampler": {"argumentCount": 0, "glVersion": "GL_VERSION_3_2"},
+    "deleteSampler": {"argumentCount": 1, "glVersion": "GL_VERSION_3_2"},
+    "createTransformFeedback": {"argumentCount": 0, "glVersion": "GL_VERSION_4_0"},
+    "deleteTransformFeedback": {"argumentCount": 1, "glVersion": "GL_VERSION_4_0"},
 };
 
 var customWebGlConstantImplementations = {
