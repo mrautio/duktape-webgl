@@ -58,6 +58,27 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_isContextLost(duk_context *ctx) {
     return 1;
 }
 
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getSupportedExtensions(duk_context *ctx) {
+    /*
+     * ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getSupportedExtensions
+     * Note: No extensions supported at the moment
+     * Will return an empty array.
+     */
+    duk_push_array(ctx);
+    return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getExtension(duk_context *ctx) {
+    /*
+     * ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/getExtension
+     * Note: No extensions supported at the moment
+     * Will return null.
+     */
+    /*const GLchar *extension =*/ (const GLchar *)duk_get_string(ctx, 0);
+    duk_push_null(ctx);
+    return 1;
+}
+
 #endif /* GL_VERSION_1_0 */
 
 #define DEFINE_CREATE_OBJECT(jsFunctionName, cFunctionName) \

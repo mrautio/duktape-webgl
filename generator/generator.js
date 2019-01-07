@@ -78,6 +78,8 @@ var glTypeDukTypeReturnFunctionMap = {
 
 var customWebGlBindingImplementations = {
     "isContextLost": {"argumentCount": 0, "glVersion": "GL_VERSION_1_0"},
+    "getSupportedExtensions": {"argumentCount": 0, "glVersion": "GL_VERSION_1_0"},
+    "getExtension": {"argumentCount": 1, "glVersion": "GL_VERSION_1_0"},
     "getProgramParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
     "getProgramInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "shaderSource": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
