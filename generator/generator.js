@@ -25,6 +25,7 @@ var glTypeDukTypeMap = {
     "GLshort": "int",
     "GLbyte": "int",
     "GLfixed": "int",
+    "GLsizeiptr": "int", /* khronos_ssize_t / signed long int */
     "GLubyte": "uint",
     "GLushort": "uint",
     "GLuint": "uint",
