@@ -48,6 +48,32 @@ DUK_LOCAL GLint dukwebgl_get_object_id_int(duk_context *ctx, duk_idx_t obj_idx) 
 
 #ifdef GL_VERSION_1_0
 
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getContextAttributes(duk_context *ctx) {
+    /*
+     * ref. https://www.khronos.org/registry/webgl/specs/latest/1.0/#WEBGLCONTEXTATTRIBUTES
+     * Note: Sensible fixed defaults here
+     */
+    duk_idx_t obj = duk_push_object(ctx);
+    duk_push_boolean(ctx, 1);
+    duk_put_prop_string(ctx, obj, "alpha");
+    duk_push_boolean(ctx, 1);
+    duk_put_prop_string(ctx, obj, "depth");
+    duk_push_boolean(ctx, 1);
+    duk_put_prop_string(ctx, obj, "stencil");
+    duk_push_boolean(ctx, 1);
+    duk_put_prop_string(ctx, obj, "antialias");
+    duk_push_boolean(ctx, 1);
+    duk_put_prop_string(ctx, obj, "premultipliedAlpha");
+    duk_push_boolean(ctx, 0);
+    duk_put_prop_string(ctx, obj, "preserveDrawingBuffer");
+    duk_push_string(ctx, "default");
+    duk_put_prop_string(ctx, obj, "powerPreference");
+    duk_push_boolean(ctx, 0);
+    duk_put_prop_string(ctx, obj, "failIfMajorPerformanceCaveat");
+
+    return 1;
+}
+
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_isContextLost(duk_context *ctx) {
     /*
      * ref. https://www.khronos.org/registry/webgl/specs/latest/1.0/#5.14.13
@@ -305,6 +331,20 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_shaderSource(duk_context *ctx) {
     return 0;
 }
 
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getShaderSource(duk_context *ctx) {
+    GLuint shader = dukwebgl_get_object_id_uint(ctx, 0);
+
+    const GLsizei maxLength = 65536;
+    GLchar source[maxLength];
+    GLsizei length = 0;
+
+    glGetShaderSource(shader, maxLength, &length, source);
+
+    duk_push_string(ctx, (const char*)source);
+
+    return 1;
+}
+
 /* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bufferData */
 DUK_LOCAL duk_ret_t dukwebgl_custom_impl_bufferData(duk_context *ctx) {
     int argc = duk_get_top(ctx);
@@ -509,6 +549,25 @@ DEFINE_CREATE_OBJECT(createRenderbuffer, glGenRenderbuffers)
 DEFINE_DELETE_OBJECT(deleteRenderbuffer, glDeleteRenderbuffers)
 
 #endif /* GL_VERSION_3_0 */
+
+#ifdef GL_VERSION_3_1
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getActiveUniformBlockName(duk_context *ctx) {
+    GLuint program = dukwebgl_get_object_id_uint(ctx, 0);
+    GLuint uniformBlockIndex = duk_get_uint(ctx, 1);
+
+    const GLsizei maxLength = 1024;
+    GLchar uniformBlockName[maxLength];
+    GLsizei length = 0;
+
+    glGetActiveUniformBlockName(program, uniformBlockIndex, maxLength, &length, uniformBlockName);
+
+    duk_push_string(ctx, (const char*)uniformBlockName);
+
+    return 1;
+}
+
+#endif /* GL_VERSION_3_1 */
 
 #ifdef GL_VERSION_3_2
 

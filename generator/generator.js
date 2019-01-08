@@ -83,12 +83,14 @@ var glTypeDukTypeReturnFunctionMap = {
 };
 
 var customWebGlBindingImplementations = {
+    "getContextAttributes": {"argumentCount": 0, "glVersion": "GL_VERSION_1_0"},
     "isContextLost": {"argumentCount": 0, "glVersion": "GL_VERSION_1_0"},
     "getSupportedExtensions": {"argumentCount": 0, "glVersion": "GL_VERSION_1_0"},
     "getExtension": {"argumentCount": 1, "glVersion": "GL_VERSION_1_0"},
     "getProgramParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
     "getProgramInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "shaderSource": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
+    "getShaderSource": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "getShaderParameter": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
     "getShaderInfoLog": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "createBuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
@@ -129,6 +131,7 @@ var customWebGlBindingImplementations = {
     "deleteFramebuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
     "createRenderbuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
     "deleteRenderbuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
+    "getActiveUniformBlockName": {"argumentCount": 2, "glVersion": "GL_VERSION_3_1"},
     "createSampler": {"argumentCount": 0, "glVersion": "GL_VERSION_3_2"},
     "deleteSampler": {"argumentCount": 1, "glVersion": "GL_VERSION_3_2"},
     "createTransformFeedback": {"argumentCount": 0, "glVersion": "GL_VERSION_4_0"},
