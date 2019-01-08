@@ -512,6 +512,31 @@ DEFINE_DELETE_OBJECT(deleteRenderbuffer, glDeleteRenderbuffers)
 
 #ifdef GL_VERSION_3_2
 
+/* only utilized with WebGLSync / GLsync */
+DUK_LOCAL void dukwebgl_create_object_ptr(duk_context *ctx, void *ptr) {
+    if (ptr == NULL) {
+        duk_push_null(ctx);
+        return;
+    }
+
+    duk_idx_t obj = duk_push_object(ctx);
+    duk_push_pointer(ctx, ptr);
+    duk_put_prop_string(ctx, obj, "_ptr");
+}
+
+DUK_LOCAL void* dukwebgl_get_object_ptr(duk_context *ctx, duk_idx_t obj_idx) {
+    void* ret = 0;
+
+    /* everything else than object assumed null */
+    if (duk_is_object(ctx, obj_idx)) {
+        duk_get_prop_string(ctx, obj_idx, "_ptr");
+        ret = duk_to_pointer(ctx, -1);
+        duk_pop(ctx);
+    }
+
+    return ret;
+}
+
 DEFINE_CREATE_OBJECT(createSampler, glGenSamplers)
 DEFINE_DELETE_OBJECT(deleteSampler, glDeleteSamplers)
 

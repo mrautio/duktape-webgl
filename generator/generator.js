@@ -40,6 +40,7 @@ var glTypeDukTypeMap = {
 };
 
 var glTypeDukTypeParameterFunctionMap = {
+    "WebGLSync": function(index) { return `dukwebgl_get_object_ptr(ctx, ${index})` },
     "WebGLProgram": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
     "WebGLShader": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
     "WebGLUniformLocation": function(index) { return `dukwebgl_get_object_id_uint(ctx, ${index})` },
@@ -65,6 +66,7 @@ var glTypeDukTypeParameterFunctionMap = {
 };
 
 var glTypeDukTypeReturnFunctionMap = {
+    "WebGLSync": function() { return `dukwebgl_create_object_ptr(ctx, ret)` },
     "WebGLProgram": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
     "WebGLShader": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
     "WebGLUniformLocation": function() { return `dukwebgl_create_object_uint(ctx, ret)` },
@@ -332,7 +334,7 @@ methods.forEach(m => {
     if (m.returnType !== 'void') {
         returnVariable = true;
 
-        if (!(m.cMethod.returnType in glTypeDukTypeMap)) {
+        if (!(m.cMethod.returnType in glTypeDukTypeMap) && !(m.returnType in glTypeDukTypeReturnFunctionMap)) {
             cResult += `    /* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) / ${m.cMethod.returnType} ${m.cMethod.name} (${JSON.stringify(m.cMethod.argumentList)}) */\n`;
             return;
         }
@@ -365,11 +367,11 @@ methods.forEach(m => {
     var cCall = `${m.cMethod.name}(${cCallVariables.join()})`;
 
     if (returnVariable) {
-        var dukReturnType = glTypeDukTypeMap[m.cMethod.returnType];
         cResult += `    ${m.cMethod.returnType} ret = ${cCall};\n`;
         if (m.returnType in glTypeDukTypeReturnFunctionMap) {
             cResult += `    ${glTypeDukTypeReturnFunctionMap[m.returnType]()};\n`;
         } else if (m.returnType === m.cMethod.returnType) {
+            var dukReturnType = glTypeDukTypeMap[m.cMethod.returnType];
             cResult += `    duk_push_${dukReturnType}(ctx, ret);\n`;
         } else {
             throw `Cannot process method: ${m.returnType} ${m.name} => ${m.cMethod.returnType} ${m.cMethod.name}`;
