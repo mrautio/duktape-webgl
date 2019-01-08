@@ -525,7 +525,7 @@ DUK_LOCAL void dukwebgl_create_object_ptr(duk_context *ctx, void *ptr) {
 }
 
 DUK_LOCAL void* dukwebgl_get_object_ptr(duk_context *ctx, duk_idx_t obj_idx) {
-    void* ret = 0;
+    void* ret = NULL;
 
     /* everything else than object assumed null */
     if (duk_is_object(ctx, obj_idx)) {
