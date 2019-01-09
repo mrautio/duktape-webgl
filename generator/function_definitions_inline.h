@@ -381,6 +381,37 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_bufferData(duk_context *ctx) {
     return 0;
 }
 
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_drawBuffers(duk_context *ctx) {
+    duk_idx_t idx = 0;
+    if (duk_is_array(ctx, idx)) {
+        duk_get_prop_string(ctx, idx, "length");
+        unsigned int length = duk_to_uint(ctx, -1);
+        duk_pop(ctx);
+
+        GLenum *bufs = (GLenum*)malloc(sizeof(GLenum) * length);
+        if (bufs == NULL) {
+            /* TODO: maybe some better way needed in out-of-memory cases */
+            return DUK_ERR_ERROR;
+        }
+
+        for(unsigned int i = 0; i < length; i++) {
+            duk_get_prop_index(ctx, idx, 0);
+            GLenum buf = (GLenum)duk_to_uint(ctx, -1);
+            duk_pop(ctx);
+
+            bufs[i] = buf;
+        }
+
+        glDrawBuffers((GLsizei)length, (const GLenum *)bufs);
+
+        free(bufs);
+
+        return 0;
+    }
+
+    return DUK_ERR_TYPE_ERROR;
+}
+
 /* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D */
 
 DUK_LOCAL void * dukwebgl_get_pixels(duk_context *ctx, duk_idx_t idx) {
@@ -538,6 +569,24 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage3D(duk_context *ctx) {
 #endif /* GL_VERSION_2_0 */
 
 #ifdef GL_VERSION_3_0
+
+#define DEFINE_CLEAR_BUFFER_V(jsFunctionName, cType, cFunctionName) \
+    DUK_LOCAL duk_ret_t dukwebgl_custom_impl_##jsFunctionName (duk_context *ctx) { \
+        int argc = duk_get_top(ctx); \
+        GLenum buffer = (GLenum)duk_get_uint(ctx, 0); \
+        GLint drawbuffer = (GLint)duk_get_int(ctx, 1); \
+        cType *value = (cType *)duk_get_buffer_data(ctx, 2, NULL); \
+        if (argc > 3) { \
+            GLuint srcOffset = (GLuint)duk_get_uint(ctx, 3); \
+            value = value + srcOffset; \
+        } \
+        cFunctionName (buffer, drawbuffer, (const cType *)value); \
+        return 0; \
+    }
+
+DEFINE_CLEAR_BUFFER_V(clearBufferfv, GLfloat, glClearBufferfv)
+DEFINE_CLEAR_BUFFER_V(clearBufferiv, GLint, glClearBufferiv)
+DEFINE_CLEAR_BUFFER_V(clearBufferuiv, GLuint, glClearBufferuiv)
 
 DEFINE_CREATE_OBJECT(createVertexArray, glGenVertexArrays)
 DEFINE_DELETE_OBJECT(deleteVertexArray, glDeleteVertexArrays)

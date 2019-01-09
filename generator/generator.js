@@ -100,6 +100,7 @@ var customWebGlBindingImplementations = {
     "createQuery": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
     "deleteQuery": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "bufferData": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+    "drawBuffers": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "texImage2D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
     "readPixels": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
     "texSubImage2D": {"argumentCount": 9, "glVersion": "GL_VERSION_2_0"},
@@ -131,6 +132,9 @@ var customWebGlBindingImplementations = {
     "deleteFramebuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
     "createRenderbuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
     "deleteRenderbuffer": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
+    "clearBufferfv": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_3_0"},
+    "clearBufferiv": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_3_0"},
+    "clearBufferuiv": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_3_0"},
     "getActiveUniformBlockName": {"argumentCount": 2, "glVersion": "GL_VERSION_3_1"},
     "createSampler": {"argumentCount": 0, "glVersion": "GL_VERSION_3_2"},
     "deleteSampler": {"argumentCount": 1, "glVersion": "GL_VERSION_3_2"},
@@ -247,6 +251,8 @@ DUK_EXTERNAL_DECL void dukwebgl_bind(duk_context *ctx);
 #endif /* DUKWEBGL_H_INCLUDED */
 
 #if defined(DUKWEBGL_IMPLEMENTATION)
+
+#include <stdlib.h>
 
 #if !defined(GL_NONE)
 #error "OpenGL constants not found. OpenGL header must be included before dukwebgl!"
