@@ -352,7 +352,7 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_bufferData(duk_context *ctx) {
     GLenum target = (GLenum)duk_get_uint(ctx, 0);
 
     duk_size_t data_size = 0;
-    void *data = NULL;
+    GLvoid *data = NULL;
     if (duk_is_buffer_data(ctx, 1)) {
         data = duk_get_buffer_data(ctx, 1, &data_size);
     } else {
@@ -362,21 +362,59 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_bufferData(duk_context *ctx) {
 
     GLenum usage = (GLenum)duk_get_uint(ctx, 2);
 
-    GLuint src_offset = 0;
-
     if (argc > 3) {
         /* WebGL 2 mandatory */
-        src_offset = (GLuint)duk_get_uint(ctx, 3);
-        data_size -= src_offset;
+        GLuint src_offset = (GLuint)duk_get_uint(ctx, 3);
+        data = (GLvoid*)((char*)data + src_offset);
+        data_size = data_size - src_offset;
 
         if (argc > 4) {
             /* WebGL 2 optional */
-            data_size = (GLuint)duk_get_uint(ctx, 4);
+            GLuint length = (GLuint)duk_get_uint(ctx, 4);
+
+            if (length > 0 && (GLsizeiptr)length <= data_size) {
+                data_size = (GLsizeiptr)length;
+            }
+
         }
     }
 
     glBufferData(target, (GLsizeiptr)((char*)NULL + data_size), (const GLvoid *)data, usage);
     /* GL 4.5: glNamedBufferData(target, (GLsizeiptr)(NULL + data_size), (const GLvoid *)data, usage); */
+
+    return 0;
+}
+
+/* ref. https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bufferSubData */
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_bufferSubData(duk_context *ctx) {
+    int argc = duk_get_top(ctx);
+
+    GLenum target = (GLenum)duk_get_uint(ctx, 0);
+
+    GLintptr offset = (GLintptr)((char*)NULL + duk_get_uint(ctx, 1));
+
+    duk_size_t data_size = 0;
+    GLvoid * data = NULL;
+    if (duk_is_buffer_data(ctx, 2)) {
+        data = duk_get_buffer_data(ctx, 2, &data_size);
+    }
+
+    if (argc > 3) {
+        GLuint src_offset = (GLuint)duk_get_uint(ctx, 3);
+        data = (GLvoid*)((char*)data + src_offset);
+        data_size = data_size - src_offset;
+
+        if (argc > 4) {
+            GLuint length = (GLuint)duk_get_uint(ctx, 4);
+
+            if (data_size > 0 && (GLsizeiptr)length <= data_size) {
+                data_size = (GLsizeiptr)length;
+            }
+        }
+
+    }
+
+    glBufferSubData(target, offset, (GLsizeiptr)((char*)NULL + data_size), (const GLvoid *)data);
 
     return 0;
 }

@@ -100,6 +100,7 @@ var customWebGlBindingImplementations = {
     "createQuery": {"argumentCount": 0, "glVersion": "GL_VERSION_2_0"},
     "deleteQuery": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "bufferData": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
+    "bufferSubData": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
     "drawBuffers": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "texImage2D": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
     "readPixels": {"argumentCount": "DUK_VARARGS", "glVersion": "GL_VERSION_2_0"},
