@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/mrautio/duktape-webgl.png)](https://travis-ci.com/mrautio/duktape-webgl)
+![Build and test](https://github.com/mrautio/duktape-webgl/workflows/Build%20and%20test/badge.svg)
 
 # duktape-webgl
 [WebGL](https://www.khronos.org/webgl/) 2.0 bindings for [Duktape embeddable Javascript engine](http://duktape.org)
