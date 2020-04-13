@@ -1,0 +1,21 @@
+name: Build and test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build binding generator
+      run: docker build -t duktape-webgl-generator -f generator/Dockerfile .
+    - name: Generate bindings
+      run: docker run -t --read-only duktape-webgl-generator > examples/00_bootstrap/dukwebgl.h
+    - name: Build examples
+      run: docker build -t duktape-webgl-examples examples
+    - name: Test bindings and examples
+      run: docker run --rm -t duktape-webgl-examples
