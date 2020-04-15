@@ -19,3 +19,8 @@ jobs:
       run: docker build -t duktape-webgl-examples examples
     - name: Test bindings and examples
       run: docker run --rm -t duktape-webgl-examples
+    - name: Upload generated dukwebgl.h
+      uses: actions/upload-artifact@v1
+      with:
+        name: dukwebgl.h
+        path: examples/00_bootstrap/dukwebgl.h
