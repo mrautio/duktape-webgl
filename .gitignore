@@ -1,3 +1,10 @@
+# custom
+
+# Do not store generated header in the repository
+dukwebgl.h
+
+# Github auto-generated:
+
 # Logs
 logs
 *.log
