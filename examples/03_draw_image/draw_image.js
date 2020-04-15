@@ -174,6 +174,28 @@ function init() {
 
     program = makeProgram(vertexShader, fragmentShader);
 
+    // Check that shader program uniform count and information is correct
+    if (gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS) != 1) {
+        throw "Shader uniform count should be 1";
+    }
+    var activeInfo = gl.getActiveUniform(program, 0);
+    if (activeInfo.type != gl.SAMPLER_2D || activeInfo.name != textureUniformName || activeInfo.size != 1) {
+        throw "Uniform active info incorrect! " + JSON.stringify();
+    }
+
+    // Check that shader program attribute count and information is correct
+    if (gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES) != 2) {
+        throw "Shader attribute count should be 2";
+    }
+    activeInfo = gl.getActiveAttrib(program, 0);
+    if (activeInfo.type != gl.FLOAT_VEC3 || activeInfo.name != 'vertexPosition' || activeInfo.size != 1) {
+        throw "Attrib active info incorrect! " + JSON.stringify();
+    }
+    activeInfo = gl.getActiveAttrib(program, 1);
+    if (activeInfo.type != gl.FLOAT_VEC2 || activeInfo.name != 'vertexTexCoord' || activeInfo.size != 1) {
+        throw "Attrib active info incorrect! " + JSON.stringify();
+    }
+
     gl.useProgram(program);
     gl.uniform1i(gl.getUniformLocation(program, textureUniformName), 0);
 

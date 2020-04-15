@@ -1,3 +1,4 @@
+
 DUK_LOCAL void dukwebgl_create_object_uint(duk_context *ctx, GLuint id) {
     if (id == 0) {
         duk_push_null(ctx);
@@ -597,11 +598,62 @@ DUK_LOCAL duk_ret_t dukwebgl_custom_impl_texImage3D(duk_context *ctx) {
     GLuint offset = 0;
     if (argc > 9) {
         offset = (GLuint)duk_get_uint(ctx, 10);
-    pixels = (char*)pixels + offset;
+        pixels = (char*)pixels + offset;
     }
 
     glTexImage3D(target,level,internalformat,width,height,depth,border,format,type,pixels);
     return 0;
+}
+
+DUK_LOCAL void dukwebgl_create_WebGLActiveInfo(duk_context *ctx, GLchar *name, GLsizei length, GLenum type, GLint size) {
+    if (length <= 0) {
+	/* return value not defined in invalid case for WebGL
+	   OpenGL errors will happen anyway */
+        duk_push_undefined(ctx);
+        return;
+    }
+
+    duk_idx_t obj = duk_push_object(ctx);
+    duk_push_string(ctx, (const char*)name);
+    duk_put_prop_string(ctx, obj, "name");
+    duk_push_uint(ctx, type);
+    duk_put_prop_string(ctx, obj, "type");
+    duk_push_int(ctx, size);
+    duk_put_prop_string(ctx, obj, "size");
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getActiveAttrib(duk_context *ctx) {
+    GLuint program = dukwebgl_get_object_id_uint(ctx, 0);
+    GLuint index = (GLuint)duk_get_uint(ctx, 1);
+
+    const GLsizei bufSize = 1024;
+    GLchar name[bufSize];
+    GLsizei length = 0;
+    GLenum type;
+    GLint size;
+
+    glGetActiveAttrib(program, index, bufSize, &length, &size, &type, name);
+
+    dukwebgl_create_WebGLActiveInfo(ctx, name, length, type, size);
+
+    return 1;
+}
+
+DUK_LOCAL duk_ret_t dukwebgl_custom_impl_getActiveUniform(duk_context *ctx) {
+    GLuint program = dukwebgl_get_object_id_uint(ctx, 0);
+    GLuint index = (GLuint)duk_get_uint(ctx, 1);
+
+    const GLsizei bufSize = 1024;
+    GLchar name[bufSize];
+    GLsizei length = 0;
+    GLenum type;
+    GLint size;
+
+    glGetActiveUniform(program, index, bufSize, &length, &size, &type, name);
+
+    dukwebgl_create_WebGLActiveInfo(ctx, name, length, type, size);
+
+    return 1;
 }
 
 #endif /* GL_VERSION_2_0 */
