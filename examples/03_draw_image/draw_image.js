@@ -182,6 +182,14 @@ function init() {
     if (activeInfo.type != gl.SAMPLER_2D || activeInfo.name != textureUniformName || activeInfo.size != 1) {
         throw "Uniform active info incorrect! " + JSON.stringify();
     }
+    var uniformLocation = gl.getUniformLocation(program, activeInfo.name);
+    if (uniformLocation === null || uniformLocation === void null) {
+        throw "Uniform location is incorrect??? " + uniformLocation;
+    }
+
+    if (gl.getUniformLocation(program, "notexistinguniform") !== null) {
+        throw "Expecting null for non-existing uniform location";
+    }
 
     // Check that shader program attribute count and information is correct
     if (gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES) != 2) {
@@ -194,6 +202,14 @@ function init() {
     activeInfo = gl.getActiveAttrib(program, 1);
     if (activeInfo.type != gl.FLOAT_VEC2 || activeInfo.name != 'vertexTexCoord' || activeInfo.size != 1) {
         throw "Attrib active info incorrect! " + JSON.stringify();
+    }
+    var attribLocation = gl.getAttribLocation(program, activeInfo.name);
+    if (attribLocation === null || attribLocation === void null) {
+        throw "Attrib location is incorrect??? " + attribLocation;
+    }
+
+    if (gl.getAttribLocation(program, "notexistingattrib") !== -1) {
+        throw "Expecting -1 for non-existing attrib location";
     }
 
     gl.useProgram(program);

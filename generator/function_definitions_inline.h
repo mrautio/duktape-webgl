@@ -24,7 +24,7 @@ DUK_LOCAL GLuint dukwebgl_get_object_id_uint(duk_context *ctx, duk_idx_t obj_idx
 }
 
 DUK_LOCAL void dukwebgl_create_object_int(duk_context *ctx, GLint id) {
-    if (id == 0) {
+    if (id < 0) {
         duk_push_null(ctx);
         return;
     }
