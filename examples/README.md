@@ -18,6 +18,7 @@ Luckily there are plenty of good tutorials, so if you're interested in learning 
 * Note that dukwebgl.h header file is not available by default so you need to place the header to 00\_bootstrap directory
 
 ```
+docker build -t duktape-webgl-bootstrap 00_bootstrap
 docker build -t duktape-webgl-examples . && docker run --rm -t duktape-webgl-examples
 ```
 

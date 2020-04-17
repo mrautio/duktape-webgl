@@ -13,6 +13,7 @@
 #include <SDL2/SDL.h>
 
 /* Include Duktape before duktape-webgl */
+#include <duk_config.h>
 #include <duktape.h>
 
 /* Include duktape-webgl */

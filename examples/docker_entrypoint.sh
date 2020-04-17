@@ -46,10 +46,10 @@ export DISPLAY=:99
 sleep 5s
 
 # run tests
-00_bootstrap/bootstrap.exe 00_bootstrap/exit_success.js
-00_bootstrap/bootstrap.exe 00_bootstrap/exit_failure.js || assert_ret $? 1 
-00_bootstrap/bootstrap.exe 00_bootstrap/exit_failure_invalid_gl_call.js || assert_ret $? 1
-00_bootstrap/bootstrap.exe 01_grey_screen/grey_screen.js || assert_ret $? 1 && screenshot_diff screenshot_01_actual.png 01_grey_screen/screenshot_grey_screen.png
-00_bootstrap/bootstrap.exe 02_hello_triangle/hello_triangle.js || assert_ret $? 1 && screenshot_diff screenshot_02_actual.png 02_hello_triangle/screenshot_hello_triangle.png
-00_bootstrap/bootstrap.exe 03_draw_image/draw_image.js || assert_ret $? 1 && screenshot_diff screenshot_03_actual.png 03_draw_image/screenshot_draw_image.png
-00_bootstrap/bootstrap.exe 04_render_to_texture/render_to_texture.js || assert_ret $? 1 && screenshot_diff screenshot_04_actual.png 04_render_to_texture/screenshot_render_to_texture.png
+bootstrap.exe 00_bootstrap/exit_success.js
+bootstrap.exe 00_bootstrap/exit_failure.js || assert_ret $? 1 
+bootstrap.exe 00_bootstrap/exit_failure_invalid_gl_call.js || assert_ret $? 1
+bootstrap.exe 01_grey_screen/grey_screen.js || assert_ret $? 1 && screenshot_diff screenshot_01_actual.png 01_grey_screen/screenshot_grey_screen.png
+bootstrap.exe 02_hello_triangle/hello_triangle.js || assert_ret $? 1 && screenshot_diff screenshot_02_actual.png 02_hello_triangle/screenshot_hello_triangle.png
+bootstrap.exe 03_draw_image/draw_image.js || assert_ret $? 1 && screenshot_diff screenshot_03_actual.png 03_draw_image/screenshot_draw_image.png
+bootstrap.exe 04_render_to_texture/render_to_texture.js || assert_ret $? 1 && screenshot_diff screenshot_04_actual.png 04_render_to_texture/screenshot_render_to_texture.png
