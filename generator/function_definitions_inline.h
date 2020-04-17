@@ -138,11 +138,11 @@ DEFINE_DELETE_OBJECT(deleteQuery, glDeleteQueries)
 /* FIXME: srcOffset / srcLength support : https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/uniformMatrix */
 #define DEFINE_UNIFORM_MATRIX(jsFunctionName, cFunctionName) \
     DUK_LOCAL duk_ret_t dukwebgl_custom_impl_##jsFunctionName (duk_context *ctx) { \
-        GLuint location = dukwebgl_get_object_id_uint(ctx, 0); \
+        GLint location = dukwebgl_get_object_id_int(ctx, 0); \
         GLboolean transpose = (GLboolean)(duk_get_boolean(ctx, 1) == 1 ? GL_TRUE : GL_FALSE); \
         duk_size_t count = 0; \
         const GLfloat *value = (const GLfloat *)duk_get_buffer_data(ctx, 2, &count); \
-        cFunctionName (location, (GLsizei)count, transpose, value); \
+        cFunctionName (location, 1, transpose, value); \
         return 0; \
     }
 
@@ -158,7 +158,7 @@ DEFINE_UNIFORM_MATRIX(uniformMatrix4x3fv, glUniformMatrix4x3fv)
 
 #define DEFINE_UNIFORM_FV(jsFunctionName, cType, cFunctionName) \
     DUK_LOCAL duk_ret_t dukwebgl_custom_impl_##jsFunctionName (duk_context *ctx) { \
-        GLuint location = dukwebgl_get_object_id_uint(ctx, 0); \
+        GLint location = dukwebgl_get_object_id_int(ctx, 0); \
         duk_size_t count = 0; \
         const cType *value = (const cType *)duk_get_buffer_data(ctx, 2, &count); \
         cFunctionName (location, (GLsizei)count, value); \
