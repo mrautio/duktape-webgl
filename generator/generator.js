@@ -129,6 +129,7 @@ var customWebGlBindingImplementations = {
     "uniform4uiv": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
     "getActiveUniform": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
     "getActiveAttrib": {"argumentCount": 2, "glVersion": "GL_VERSION_2_0"},
+    "getParameter": {"argumentCount": 1, "glVersion": "GL_VERSION_2_0"},
     "createVertexArray": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
     "deleteVertexArray": {"argumentCount": 1, "glVersion": "GL_VERSION_3_0"},
     "createFramebuffer": {"argumentCount": 0, "glVersion": "GL_VERSION_3_0"},
