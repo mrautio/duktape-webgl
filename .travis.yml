@@ -10,6 +10,7 @@ jobs:
       - docker build -t duktape-webgl-generator -f generator/Dockerfile .
       - docker run -t --read-only duktape-webgl-generator > examples/00_bootstrap/dukwebgl.h
       # compile
+      - docker build -t duktape-webgl-bootstrap examples/00_bootstrap
       - docker build -t duktape-webgl-examples examples
       # test
       - docker run --rm -t duktape-webgl-examples
