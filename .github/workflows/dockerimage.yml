@@ -11,18 +11,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
     - name: Build binding generator
       run: docker build -t duktape-webgl-generator -f generator/Dockerfile .
     - name: Generate bindings
       run: docker run -t --read-only duktape-webgl-generator > examples/00_bootstrap/dukwebgl.h
+    - name: Upload generated dukwebgl.h
+      uses: actions/upload-artifact@v1
+      with:
+        name: dukwebgl.h
+        path: examples/00_bootstrap/dukwebgl.h
     - name: Build bootstrap
       run: docker build -t duktape-webgl-bootstrap examples/00_bootstrap
     - name: Build examples
       run: docker build -t duktape-webgl-examples examples
     - name: Test bindings and examples
       run: docker run --rm -t duktape-webgl-examples
-    - name: Upload generated dukwebgl.h
-      uses: actions/upload-artifact@v1
-      with:
-        name: dukwebgl.h
-        path: examples/00_bootstrap/dukwebgl.h
+    - name: Build conformance tests
+      run: docker build -t duktape-webgl-conformance test/conformance
+    - name: Test conformance
+      run: docker run --rm -t duktape-webgl-conformance
