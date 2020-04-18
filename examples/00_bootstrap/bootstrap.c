@@ -42,12 +42,13 @@ static SDL_GLContext sdl_gl_ctx = NULL;
 static duk_context *ctx = NULL;
 static FILE *f = NULL;
 static char *data = NULL;
+static const char *file = "???";
 
 static void eval_js(duk_context *ctx, const char *data) {
     duk_push_string(ctx, data);
     duk_int_t ret = duk_peval(ctx);
     if (ret != DUK_EXEC_SUCCESS) {
-        fprintf(stderr, "Duktape eval failed: %s\n", duk_safe_to_string(ctx, -1));
+        fprintf(stderr, "[%s]: Duktape eval failed: %s\n", file, duk_safe_to_string(ctx, -1));
         exit(EXIT_FAILURE);
     }
     duk_pop(ctx);
@@ -153,6 +154,15 @@ static duk_ret_t c_js_exit(duk_context *ctx) {
     return 0;
 }
 
+/* print */
+static duk_ret_t c_js_print(duk_context *ctx) {
+    const char *text = duk_get_string(ctx, 0);
+
+    fprintf(stdout, "[%s]: %s\n", file, text); 
+ 
+    return 0;
+}
+
 /**
  * Save screenshot as raw rgba
  * Convert to PNG example: convert -flip -size 640x480 -depth 8 rgba:tmpscreenshot_000000.rgb screenshot_draw_image.png
@@ -243,6 +253,10 @@ int main (int argc, char **argv) {
     duk_push_c_function(ctx, c_js_exit, 1);
     duk_put_prop_string(ctx, -2, "bootstrapExit");
 
+    /* bind c_js_print function as "print" in Duktape context to global object */
+    duk_push_c_function(ctx, c_js_print, 1);
+    duk_put_prop_string(ctx, -2, "print");
+
     /* define window dimensions */
     duk_push_uint(ctx, BOOTSTRAP_WINDOW_WIDTH);
     duk_put_prop_string(ctx, -2, "BOOTSTRAP_WINDOW_WIDTH");
@@ -255,10 +269,15 @@ int main (int argc, char **argv) {
 
     duk_pop(ctx);
 
+    if (argc < 2) {
+        fprintf(stdout, "No javascript defined, will exit now\n");
+        exit(EXIT_FAILURE);
+    }
+
     int i;
     for (i = 1; i < argc; i++) {
         /* read file contents into memory */
-        const char *file = argv[i];
+        file = argv[i];
 
         f = fopen(file, "rb");
         if (f == NULL) {
@@ -287,9 +306,9 @@ int main (int argc, char **argv) {
         }
 
         /* evaluate file data in Duktape */
+        fprintf(stdout, "[%s]: Evaluating file\n", file);
         eval_js(ctx, data);
 
-        fprintf(stdout, "Loaded file %s\n", file);
 
         /* cleanup file iteration */
         fclose(f);
@@ -298,10 +317,17 @@ int main (int argc, char **argv) {
         data = NULL;
     }
 
-    if (argc < 2) {
-        fprintf(stdout, "No javascript defined, will exit now\n");
+    const char *DUKWEBGL_BOOTSTRAP_EXEC_ONLY = SDL_getenv("DUKWEBGL_BOOTSTRAP_EXEC_ONLY");
+    if (DUKWEBGL_BOOTSTRAP_EXEC_ONLY && !strcmp(DUKWEBGL_BOOTSTRAP_EXEC_ONLY, "TRUE")) {
+        /* Do not enter to graphics draw part */
+        if (is_gl_error()) {
+            exit(EXIT_FAILURE);
+        }
+
         exit(EXIT_SUCCESS);
     }
+
+    /* Graphics draw part, intended for examples */
 
     eval_js(ctx, "if (typeof init === 'function') { init(); } ");
 
