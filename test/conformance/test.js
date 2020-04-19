@@ -1,6 +1,5 @@
 'use strict';
 
-//import { parse } from 'node-html-parser';
 const htmlParser = require('node-html-parser');
 const fs = require('fs');
 const util = require('util');
@@ -9,6 +8,7 @@ const { execSync } = require('child_process');
 let startDir = process.cwd();
 
 let bootstrapScripts = {
+    polyfillPromise: startDir + "/node_modules/es6-promise/dist/es6-promise.auto.js",
     preHarness:  startDir + "/bootstrap/01_pre_harness.js",
     preTest:     startDir + "/bootstrap/02_pre_test.js",
     postHarness: startDir + "/bootstrap/03_post_harness.js",
@@ -27,6 +27,7 @@ function executeTestCaseFile(testCaseFile) {
     let scripts = root.querySelectorAll('script');
 
     scriptFiles.push(bootstrapScripts.preHarness);
+    scriptFiles.push(bootstrapScripts.polyfillPromise);
 
     let outputFile = testCaseFile+'.js';
     let data = '';
@@ -67,10 +68,11 @@ function executeTestCaseFile(testCaseFile) {
                 }
 
                 if (shader) {
+                    var variableName = 'shader_' + element.id.replace(/[^\w\d_]/g, "")
                     data += `\n// file: ${testCaseFile}, shader: ${element.id}\n`;
-                    data += `var shader_${element.id} = document.createElement("script");\n`;
-                    data += `shader_${element.id}.text = "` + childNode.rawText.replace(/([\r\n])/g, '\\n').replace(/(")/,'\\$1') + `";\n`;
-                    data += `document.setElementById('${element.id}', shader_${element.id});\n`;
+                    data += `var ${variableName} = document.createElement("script");\n`;
+                    data += `${variableName}.text = "` + childNode.rawText.replace(/([\r\n])/g, '\\n').replace(/(")/,'\\$1') + `";\n`;
+                    data += `document.setElementById('${element.id}', ${variableName});\n`;
                 } else {
                     data += `\n// file: ${testCaseFile}\n`;
                     data += childNode.rawText;
@@ -79,10 +81,29 @@ function executeTestCaseFile(testCaseFile) {
         }
     }
 
-    data = data.replace(/("use strict";|precision mediump float;)/g, '');
     fs.writeFileSync(outputFile, data);
-
     scriptFiles.push(bootstrapScripts.postHarness);
+
+    try {
+        for (let scriptFile of scriptFiles) {
+            let scriptData = fs.readFileSync(scriptFile,'utf8');
+            // Quick search for the common ES6 indicating notations
+            if (scriptData.match(/=>/g)) {
+                // Make script Duktape (ES5 with some ES6 features) compatible
+                // However we don't want to do unnecessary Babel transpiling
+                // As it has a heavy overhead
+                console.log("Not supported ES6 found, transpiling needed for " + scriptFile)
+                scriptData = "" + execSync("npx babel --config-file /tmp/.babelrc " + scriptFile);
+            }
+
+            scriptData = scriptData.replace(/("use strict";|precision mediump float;)/g, '');
+            fs.writeFileSync(scriptFile, scriptData);
+        }
+    } catch(err) {
+        console.log("Preprocessing error occurred: " + err.message);
+        throw err;
+    }
+
 
     try {
         let call = 'bootstrap.exe ' + scriptFiles.join(' ');
@@ -152,7 +173,7 @@ let assertedTests = [
     // typedarrays
     "array-buffer-crash.html","array-buffer-view-crash.html","data-view-crash.html","data-view-test.html",
     // ???
-    "glsl-function-nodes.html","glsl-vertex-branch.html","re-compile-re-link.html","tex-image-canvas-corruption.html","texture-cube-as-fbo-attachment.html","texture-upload-cube-maps.html","texture-draw-with-2d-and-cube.html",
+    "glsl-function-nodes.html","glsl-vertex-branch.html","re-compile-re-link.html","tex-image-canvas-corruption.html","texture-cube-as-fbo-attachment.html","texture-upload-cube-maps.html","texture-draw-with-2d-and-cube.html","sampler-struct-function-arg.html","gl-teximage.html","origin-clean-conformance.html",
 ];
 //misc  ogles     reading        rendering  textures     uniforms buffers  context  glsl        manual  more  programs  renderbuffers  state      typedarrays  limits  canvas  
 //fix: ogles needs a recursion, textures, glsl, manual
@@ -212,7 +233,7 @@ function runTestList(testList) {
                 }
             } catch(e) {
                 testResults.fail++;
-                let result = {pass:false};
+                let result = {pass:false,errorMessage:e.message};
                 result.status = e.status;
                 if ((""+e.stderr).match(/Segmentation fault/)) {
                     result.segfault = true;
@@ -232,6 +253,7 @@ function runTestList(testList) {
     process.chdir(currentPath);
 }
 
+let start = Date.now();
 runTestList('WebGL/conformance-suites/2.0.0/conformance/00_test_list.txt');
 
 process.chdir(startDir);
@@ -240,6 +262,7 @@ console.log(JSON.stringify(testLog, null, 2));
 
 testResults.count = testResults.fail + testResults.pass;
 testResults.successPercent = testResults.pass / testResults.count;
+testResults.elapsed = Date.now() - start;
 console.log(JSON.stringify(testResults, null, 2));
 
 if (notAssertedPassedTests.length > 0) {

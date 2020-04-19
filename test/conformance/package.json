@@ -7,6 +7,10 @@
   ],
   "license": "Zlib",
   "dependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-transform-arrow-functions": "^7.8.3",
+    "es6-promise": "^4.2.8",
     "node-html-parser": "^1.2.16"
   },
   "devDependencies": {},

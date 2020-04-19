@@ -7,6 +7,12 @@ if (!String.prototype.startsWith) {
     };
 }
 
+if (!setTimeout) {
+    function setTimeout(func, timeout) {
+        func();
+    }
+}
+
 // Bare minimum dummy implementation for the WebGL compliance test harness
 
 var BrowserDummyImpl = {};
