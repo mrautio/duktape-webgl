@@ -14,4 +14,4 @@ ADD 02_hello_triangle 02_hello_triangle
 ADD 03_draw_image 03_draw_image
 ADD 04_render_to_texture 04_render_to_texture
 
-CMD ["sh", "docker_entrypoint.sh"]
+CMD ["bash", "docker_entrypoint.sh"]

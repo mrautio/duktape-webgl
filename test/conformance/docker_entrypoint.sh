@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
@@ -10,4 +10,4 @@ export DISPLAY=:99
 sleep 5s
 
 # run tests
-npm --no-update-notifier start
+time npm --no-update-notifier start

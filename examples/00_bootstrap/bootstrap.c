@@ -40,8 +40,6 @@
 static SDL_Window *window = NULL;
 static SDL_GLContext sdl_gl_ctx = NULL;
 static duk_context *ctx = NULL;
-static FILE *f = NULL;
-static char *data = NULL;
 static const char *file = "???";
 
 static void eval_js(duk_context *ctx, const char *data) {
@@ -113,14 +111,6 @@ static duk_bool_t is_gl_error() {
 }
 
 static void cleanup(void) {
-    if (data) {
-        free(data);
-    }
-
-    if (f) {
-        fclose(f);
-    }
-
     if (ctx) {
         eval_js(ctx, "if (typeof cleanup === 'function') { cleanup(); } ");
 
@@ -139,6 +129,39 @@ static void cleanup(void) {
     }
 
     SDL_Quit();
+}
+
+static char* read_file(const char *file) {
+    FILE *f = fopen(file, "rb");
+    if (f == NULL) {
+        fprintf(stderr, "Could not open file for read: %s\n", file);
+        exit(EXIT_FAILURE);
+    }
+
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    if (size == -1L) {
+        fclose(f);
+        fprintf(stderr, "Could not seek file: %s\n", file);
+        exit(EXIT_FAILURE);
+    }
+    fseek(f, 0, SEEK_SET);
+
+    char *data = (char*)calloc(sizeof(char), (size + 1));
+    if (data == NULL) {
+        fclose(f);
+        fprintf(stderr, "Could allocate memory to read file: %s\n", file);
+        exit(EXIT_FAILURE);
+    }
+
+    size_t read_size = fread(data, sizeof(char), size, f);
+    fclose(f);
+    if (read_size != (size_t)size) {
+        fprintf(stderr, "Could not read file completely: %s, %ld <=> %ld\n", file, size, read_size);
+        exit(EXIT_FAILURE);
+    }
+
+    return data;
 }
 
 /* Helper function so that user can exit from JavaScript programmatically */
@@ -161,6 +184,17 @@ static duk_ret_t c_js_print(duk_context *ctx) {
     fprintf(stdout, "[%s]: %s\n", file, text); 
  
     return 0;
+}
+
+/* read file */
+static duk_ret_t c_js_read_file_sync(duk_context *ctx) {
+    const char *file = duk_get_string(ctx, 0);
+
+    char *data = read_file(file);
+    duk_push_string(ctx, data);
+    free(data);
+ 
+    return 1;
 }
 
 /**
@@ -257,6 +291,10 @@ int main (int argc, char **argv) {
     duk_push_c_function(ctx, c_js_print, 1);
     duk_put_prop_string(ctx, -2, "print");
 
+    /* bind c_js_read_file_sync function as "readFileSync" in Duktape context to global object */
+    duk_push_c_function(ctx, c_js_read_file_sync, 1);
+    duk_put_prop_string(ctx, -2, "readFileSync");
+
     /* define window dimensions */
     duk_push_uint(ctx, BOOTSTRAP_WINDOW_WIDTH);
     duk_put_prop_string(ctx, -2, "BOOTSTRAP_WINDOW_WIDTH");
@@ -278,43 +316,14 @@ int main (int argc, char **argv) {
     for (i = 1; i < argc; i++) {
         /* read file contents into memory */
         file = argv[i];
-
-        f = fopen(file, "rb");
-        if (f == NULL) {
-            fprintf(stderr, "Could not open file for read: %s\n", file);
-            exit(EXIT_FAILURE);
-        }
-
-        fseek(f, 0, SEEK_END);
-        long size = ftell(f);
-        if (size == -1L) {
-            fprintf(stderr, "Could not seek file: %s\n", file);
-            exit(EXIT_FAILURE);
-        }
-        fseek(f, 0, SEEK_SET);
-
-        data = (char*)calloc(sizeof(char), (size + 1));
-        if (data == NULL) {
-            fprintf(stderr, "Could allocate memory to read file: %s\n", file);
-            exit(EXIT_FAILURE);
-        }
-
-        size_t read_size = fread(data, sizeof(char), size, f);
-        if (read_size != (size_t)size) {
-            fprintf(stderr, "Could not read file completely: %s, %ld <=> %ld\n", file, size, read_size);
-            exit(EXIT_FAILURE);
-        }
+        char *data = read_file(file);
 
         /* evaluate file data in Duktape */
         fprintf(stdout, "[%s]: Evaluating file\n", file);
         eval_js(ctx, data);
 
-
         /* cleanup file iteration */
-        fclose(f);
-        f = NULL;
         free(data);
-        data = NULL;
     }
 
     const char *DUKWEBGL_BOOTSTRAP_EXEC_ONLY = SDL_getenv("DUKWEBGL_BOOTSTRAP_EXEC_ONLY");

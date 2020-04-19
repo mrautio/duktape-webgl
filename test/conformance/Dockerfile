@@ -11,4 +11,4 @@ COPY docker_entrypoint.sh test.js ./
 
 ENV DUKWEBGL_BOOTSTRAP_EXEC_ONLY=TRUE
 
-CMD [ "sh", "docker_entrypoint.sh" ]
+CMD [ "bash", "docker_entrypoint.sh" ]
