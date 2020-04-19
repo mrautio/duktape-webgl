@@ -1,6 +1,6 @@
 window.checkResults();
 
-if (!successfullyParsed) {
+if (successfullyParsed !== void null && !successfullyParsed) {
     throw "Test case not successfully parsed: " + successfullyParsed;
 }
 
