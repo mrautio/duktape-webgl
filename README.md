@@ -56,3 +56,9 @@ var gl = new WebGL2RenderingContext();
     * Variables passed from JS are assumed to be valid for intended OpenGL API calls
   * Will attempt to pass calls to underlying OpenGL C API functions with low overhead.
 
+### What about GLSL?
+
+* This API does not transpile GLSL versions.
+* If your program does not support GLSL ES directly, then you should write shaders in a cross-platform manner or do transpiling yourself.
+  * You'll get a long way already by choosing correct [#version preprocessor](https://en.wikipedia.org/wiki/OpenGL_Shading_Language#Versions)
+
