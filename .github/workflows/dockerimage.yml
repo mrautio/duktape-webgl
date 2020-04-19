@@ -31,4 +31,9 @@ jobs:
     - name: Build conformance tests
       run: docker build -t duktape-webgl-conformance test/conformance
     - name: Test conformance
-      run: docker run --rm -t duktape-webgl-conformance
+      run: docker run --rm -t duktape-webgl-conformance | tee conformance-test-log.txt
+    - name: Upload conformance test logs
+      uses: actions/upload-artifact@v1
+      with:
+        name: conformance-test-log.txt
+        path: conformance-test-log.txt
