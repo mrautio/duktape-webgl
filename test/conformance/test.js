@@ -72,8 +72,7 @@ function executeTestCaseFile(testCaseFile) {
                     var variableName = 'shader_' + element.id.replace(/[^\w\d_]/g, "")
                     data += `\n// file: ${testCaseFile}, shader: ${element.id}\n`;
                     data += `var ${variableName} = document.createElement("script");\n`;
-                    // lgtm[js/incomplete-sanitization]
-                    data += `${variableName}.text = "` + childNode.rawText.replace(/([\r\n])/g, '\\n').replace(/(")/,'\\$1') + `";\n`;
+                    data += `${variableName}.text = "` + childNode.rawText.replace(/([\r\n])/g, '\\n').replace(/(")/,'\\$1') + `";\n`; // lgtm
                     data += `document.setElementById('${element.id}', ${variableName});\n`;
                 } else {
                     data += `\n// file: ${testCaseFile}\n`;
@@ -98,8 +97,7 @@ function executeTestCaseFile(testCaseFile) {
                 // However we don't want to do unnecessary Babel transpiling
                 // As it has a heavy overhead
                 console.log("Not supported ES6 found, transpiling needed for " + scriptFile)
-                // lgtm[js/shell-command-injection-from-environment]
-                scriptData = "" + execSync("npx babel --config-file /tmp/.babelrc " + scriptFile, execOptions);
+                scriptData = "" + execSync("npx babel --config-file /tmp/.babelrc " + scriptFile, execOptions); // lgtm
             }
 
             scriptData = scriptData.replace(/("use strict";|precision mediump float;)/g, '');
@@ -116,8 +114,7 @@ function executeTestCaseFile(testCaseFile) {
     try {
         let call = 'bootstrap.exe ' + scriptFiles.join(' ');
         console.log("Exec " + call);
-        // lgtm[js/shell-command-injection-from-environment]
-        let stdout = execSync(call, execOptions);
+        let stdout = execSync(call, execOptions); // lgtm
         console.log("STDOUT: " + stdout);
         let caseData = {
             elapsed: Date.now() - start,
