@@ -56,7 +56,7 @@ jobs:
        sudo apt-get install -y libgcc-6-dev libsdl2-dev libglew-dev duktape-dev imagemagick
        docker build -t duktape-webgl-generator -f generator/Dockerfile .
        docker run -t --read-only duktape-webgl-generator > examples/00_bootstrap/dukwebgl.h
-       cd example/00_bootstrap
+       cd examples/00_bootstrap
        make
 
     - name: Perform CodeQL Analysis
