@@ -1,6 +1,6 @@
-FROM node:12-stretch
+FROM alpine:latest
 
-RUN apt-get update && apt-get install -y wget
+RUN apk add --no-cache wget nodejs npm
 
 ENV WEBGL2_IDL_URL="https://www.khronos.org/registry/webgl/specs/latest/2.0/webgl2.idl"
 ENV WEBGL1_IDL_URL="https://www.khronos.org/registry/webgl/specs/1.0.2/webgl.idl"
