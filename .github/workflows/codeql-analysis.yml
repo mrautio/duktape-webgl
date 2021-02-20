@@ -48,7 +48,7 @@ jobs:
 
     - name: Build bootstrap
       run: |
-       sudo apt-get install -y libgcc-6-dev libsdl2-dev libglew-dev duktape-dev imagemagick
+       sudo apt-get install -y build-essential libsdl2-dev libglew-dev duktape-dev imagemagick
        docker build -t duktape-webgl-generator -f generator/Dockerfile .
        docker run -t --read-only duktape-webgl-generator > examples/00_bootstrap/dukwebgl.h
        cd examples/00_bootstrap
