@@ -344,11 +344,11 @@ methods.forEach(m => {
     }
 
     var returnVariable = false;
-    if (m.returnType !== 'void') {
+    if (m.returnType !== 'undefined' && m.returnType !== 'void') {
         returnVariable = true;
 
         if (!(m.cMethod.returnType in glTypeDukTypeMap) && !(m.returnType in glTypeDukTypeReturnFunctionMap)) {
-            cResult += `    /* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) / ${m.cMethod.returnType} ${m.cMethod.name} (${JSON.stringify(m.cMethod.argumentList)}) */\n`;
+            cResult += `    /* NOT IMPLEMENTED: ${m.returnType} ${m.name} (${JSON.stringify(m.argumentList)}) / ${m.cMethod.returnType} ${m.cMethod.name} (${JSON.stringify(m.cMethod.argumentList)}) / ${JSON.stringify(m)}*/\n`;
             return;
         }
     }
