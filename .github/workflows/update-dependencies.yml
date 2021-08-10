@@ -1,0 +1,41 @@
+name: Update dependencies
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - run: sudo apt-get install -y npm
+    - name: Update generator
+      run: cd generator && npm update
+    - name: Update conformance
+      run: cd test/conformance && npm update
+    - name: Build binding generator
+      run: docker build -t duktape-webgl-generator -f generator/Dockerfile .
+    - name: Generate bindings
+      run: docker run -t --read-only duktape-webgl-generator > examples/00_bootstrap/dukwebgl.h
+    - name: Build bootstrap
+      run: docker build -t duktape-webgl-bootstrap examples/00_bootstrap
+    - name: Build examples
+      run: docker build -t duktape-webgl-examples examples
+    - name: Test bindings and examples
+      run: docker run --rm -t duktape-webgl-examples
+    - name: Build conformance tests
+      run: docker build -t duktape-webgl-conformance test/conformance
+    - name: Test conformance
+      run: docker run --rm -t duktape-webgl-conformance
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        title: Update dependencies
+        commit-message: Update dependencies
+        delete-branch: true
+
