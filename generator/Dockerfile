@@ -14,6 +14,6 @@ ADD ${OPENGL_H_URL} glcorearb.h
 COPY LICENSE /tmp/
 COPY generator/* /tmp/
 
-RUN npm install
+RUN npm ci
 
 CMD [ "npm", "--no-update-notifier", "--silent", "start" ]

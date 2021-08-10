@@ -2,8 +2,8 @@ FROM duktape-webgl-bootstrap:latest
 
 WORKDIR /tmp
 
-COPY .babelrc package.json ./
-RUN npm install
+COPY .babelrc package.json package-lock.json ./
+RUN npm ci
 
 ADD WebGL WebGL
 ADD bootstrap bootstrap
