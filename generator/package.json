@@ -7,7 +7,7 @@
   ],
   "license": "Zlib",
   "dependencies": {
-    "lodash": "*",
+    "lodash": "4.17.23",
     "webidl2": "^18.0.0"
   },
   "devDependencies": {},
